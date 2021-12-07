@@ -1,42 +1,29 @@
-﻿/**********************************************************************************
- * 
- * File: Account.cs
- * Author/s: Sikander Sandhu
- * Description:
- *          This is the core Account class that forms part of the banking system.
- *          This class allows withdrawl and deposit of money into the account,
- *          and prints the account balance to the terminal.
- *          
- **********************************************************************************/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankingSystem_1
+namespace BankingSystem_Iteration2
 {
     /// <summary>
     /// This is the core <c>Account</c> class that forms part of the banking system.
-    /// <para>This class provides a template to create a new account instance. Methods in the class allow
-    /// deposit and withdrawal of funds from  the class and prinitng of account summary.</para>
+    /// It includes methods that deposit and withdraw funds and print account summary.
     /// </summary>
     class Account
     {
         /// <summary>
-        /// Private instance variable <c>_balance</c> sets the account balance to 0 when a new account object is created.
+        /// The field to be initialized with the initial account balance
         /// </summary>
         private decimal _balance;
 
         /// <summary>
-        /// Private instance variable <c>_name</c> sets the name of the account when a new account object is created.
+        /// The field to be initialized with the account name
         /// </summary>
         private string _name;
 
         /// <summary>
-        /// <values>Property <c>Name</c> represents the account name</values>
-        /// and provides public access to read the account name.
+        /// Public property to read account name
         /// </summary>
         public string Name
         {
@@ -47,11 +34,10 @@ namespace BankingSystem_1
         }
 
         /// <summary>
-        /// This constructor initializes the new account to
-        /// (<paramref name="balance"/>,<paramref name="name"/>).
+        /// This constructor initializes the account name and balance fields.
         /// </summary>
-        /// <param name="balance">the new accounts balance.</param>
-        /// <param name="name">the new accounts name.</param>
+        /// <param name="balance">the initial accounts balance.</param>
+        /// <param name="name">name of the account</param>
         public Account(decimal balance, string name)
         {
             _balance = balance;
@@ -59,43 +45,52 @@ namespace BankingSystem_1
         }
 
         /// <summary>
-        /// This instance method increments the account <c>_balance</c> with the 
-        /// <c>amount</c> requested,
-        /// <para> only if the <c>amount</c> is greater than zero.</para>
+        /// Deposits the amount into the account and returns the 
+        /// true/false success status for the deposit.
         /// </summary>
         /// <param name="amount">the <c>amount</c> to be added to the account</param>
-        /// <exception cref="InvalidOperationException">if the <c>amount</c> to deposit is less than zero</exception>
+        /// <returns>true/false deposit success status</returns>
+        /// <exception cref="InvalidOperationException">if the amount to be deposited
+        /// is not greater than zero</exception>
         public bool Deposit(decimal amount)
         {
+            // if the amount is greater than zero
             if (amount > 0)
             {
+                // Deposit the funds
                 _balance += amount;
+                // return success status
                 return true;
             }
+            // else return fail status
             else return false;
         }
 
         /// <summary>
-        /// This instance method reduces the account <c>_balance</c> with the 
-        /// <c>amount</c> requested,
-        /// <para> only if the <c>amount</c> is greater than zero and less than the current account <c>_balance.</c></para>
+        /// Withdraws the amount from the account and return the 
+        /// true/false success status for the withdrawal.
         /// </summary>
         /// <param name="amount">the <c>amount</c> to be withdrawn from the account</param>
+        /// <returns>true/false success status for the withdrawal</returns>
         /// <exception cref="InvalidOperationException">if the <c>amount</c> to be 
         /// withdrawn is less than zero or greater than the current account <c>_balance</c>
         /// </exception>
         public bool Withdraw(decimal amount)
         {
-            if (amount > 0 && amount < _balance)
+            // if the amount is greater than zero and not greater than the balance
+            if (amount > 0 && amount <= _balance)
             {
+                // withdraw the amount
                 _balance -= amount;
+                // return the success status
                 return true;
             }
+            // else return fail status
             else return false;
         }
 
         /// <summary>
-        /// This method provides the account summary as a string.
+        /// Provides the account summary as a string.
         /// </summary>
         /// <returns>a formated string representation of the account balance.
         /// <example>For example:
@@ -108,7 +103,8 @@ namespace BankingSystem_1
         /// </example></returns>
         public override string ToString()
         {
-            return string.Format("\tAccount Summary\n\n\tAccount name: {0} \n\tAccount balance: {1:c}", _name, _balance);
+            return string.Format("\tAccount Summary\n\n\tAccount name: {0} \n\tAccount balance: {1:c}\n", _name, _balance);
         }
     }
 }
+
