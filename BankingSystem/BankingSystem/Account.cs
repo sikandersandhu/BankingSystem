@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankingSystem_Iteration2
+namespace BankingSystem_Iteration3
 {
     /// <summary>
     /// This is the core <c>Account</c> class that forms part of the banking system.
@@ -16,6 +16,10 @@ namespace BankingSystem_Iteration2
         /// The field to be initialized with the initial account balance
         /// </summary>
         private decimal _balance;
+        public decimal Balance
+        {
+            get { return _balance; }
+        }
 
         /// <summary>
         /// The field to be initialized with the account name
@@ -32,7 +36,7 @@ namespace BankingSystem_Iteration2
                 return _name;
             }
         }
-
+        
         /// <summary>
         /// This constructor initializes the account name and balance fields.
         /// </summary>
@@ -103,8 +107,7 @@ namespace BankingSystem_Iteration2
         /// </example></returns>
         public override string ToString()
         {
-            return string.Format("\tAccount Summary\n\n\tAccount name: {0} \n\tAccount balance: {1:c}\n", _name, _balance);
+            return string.Format("\t***** Account Summary *****\n\nAccount name: {0}\nAccount balance: {1:c}",_name, _balance);
         }
     }
 }
-
