@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace BankingSystem_1
+namespace BankingSystem_Iteration2
 {
     /// <summary>
     /// This public enumerated type <c>Menu</c> represent menu options
     /// <para>used in the switch case statements to provide menu options functionality.</para>
     /// <see cref="switch"/>
     /// </summary>
-    public enum MenuOptions { DEPOSIT_MONEY, WITHDRAW_MONEY, PRINT_SUMMARY, QUIT };
+    public enum MenuOptions { CREATE_NEW_ACCOUNT, DEPOSIT_MONEY, WITHDRAW_MONEY, TRANSFER_MONEY, PRINT_SUMMARY, QUIT };
 
     /// <summary>
     /// Tester class for banking system
@@ -16,135 +16,73 @@ namespace BankingSystem_1
     class BankingSystem
     {
         /// <summary>
-        /// This static function displays a message on the console, prompting the user for input.
-        /// The <c>userInput</c> is then compared with the supplied <paramref name="regexExpression"/>
-        /// using regex engine to validate user input.
-        /// <para>
-        /// If the user input is valid, the function returns validated<c>userInput</c>.
-        /// If the user input is not valid an <paramref name="errorMessage"/> is 
-        /// displayed on the console with an example of what is expectedand 
-        /// the user is prompted to provide input again in the desired format.
-        /// </para>
+        /// Displays a message to the user, reads user input and return it.
         /// </summary>
-        /// <param name="promptUser">Message to be displayed on console to prompt user input.</param>
-        /// <param name="regexExpression">The regular expression which the regex engine will use 
-        /// to match user input to perform data validation.</param>
-        /// <param name="errorMessage">The error message to be displayed if the user input could not be matched succesfully</param>
-        /// <returns>the validated user input</returns>
-        /// <exception cref="RegexParseException"> if the regular expression can not be parsed.</exception>
-        /// <exception cref="RegexMatchTimeoutException">if the operation times out based on the Time span set in the regex options </exception>
-        private static string RegexValidation(string promptUser, string regexExpression, string errorMessage)
+        /// <param name="message">Message to prompt user for input</param>
+        /// <param name="heading">Optional heading string</param>
+        /// <returns></returns>
+        public static string PromptUserInput(string message, string heading = null)
         {
-            /****** Variable declarations *******/
-            // Regex variable for data validation
-            Regex myRegex;
-            // Match variable to match regex expression
-            Match match;
-            // User input to validate
-            string userInput;
-
-            // Console message and read user input
-            Console.WriteLine(promptUser);
-            userInput = Console.ReadLine();
-
-            // Input validation
-            try
+            if (heading != null)
             {
-                myRegex = new Regex(regexExpression, RegexOptions.None, TimeSpan.FromSeconds(1));
-                match = myRegex.Match(userInput);
-                while (!match.Success)
-                {
-                    Console.WriteLine(errorMessage);
-                    userInput = Console.ReadLine();
-                    match = myRegex.Match(userInput);
-                }
-            }
-            catch(RegexParseException rpe)
-            {
-                Console.WriteLine("Regex parse exception. Could not validate user input: {0}", userInput);
-                Console.WriteLine(rpe.Message);
-            }
-            catch (RegexMatchTimeoutException rmte)
-            {
-                Console.WriteLine("The operation times out after {0:N0} miliseconds", rmte.MatchTimeout.TotalMilliseconds);
-            }
-
-            return userInput;
+                Console.WriteLine(heading);
+                Console.WriteLine();
+            }           
+            Console.WriteLine(message);
+            return (Console.ReadLine());
         }
 
         /// <summary>
-        /// This method prompts user for input, validates the input and returns the validated decimal input.
-        /// <para>While the user input is not a decimal or integer value, the user receives an error message 
-        /// and is prompted to keep trying till the correct input is received.</para>
-        /// </summary>
-        /// <param name="promptUser">The message to be displayed on the console to prompt user input.</param>
-        /// <returns>Returns a validated and parsed decimal user input value.</returns>
-        public static decimal ValidateAmount(string promptUser)
-        {
-            string userInput;
-            
-            // Prompt user for input, read and store user input in userInput variable.
-            Console.WriteLine(promptUser);
-            userInput = Console.ReadLine();
-
-            // While the user input is not an integer or decimal value,
-            // continue to prompt user for desired input.
-            while (decimal.TryParse(userInput, out _) != true)
-            {
-                Console.WriteLine("Invalid input. The amount should be an integer or decimal number.");
-                userInput = Console.ReadLine();
-            }
-
-            // Parse validated string input to decimal and return
-            return decimal.Parse(userInput);
-            
-        }
-
-        /// <summary>
-        /// This function displays a list of menu options, reads and validates user input
+        /// Displays a list of menu options, reads and validates user input
         /// </summary>
         /// <returns>returns a validated enum <c>MenuOptions</c> value. 
         /// <remarks>this value is used by the switch case options for menu functionality</remarks>
         /// </returns>
         public static MenuOptions ReadUserInput()
         {
-                // Prompt user to select menu option and Validate input
-                string validatedInput = RegexValidation("\n\t\tBanking Menu - Enter menu number for selection\n\t1. Desposit money\n\t2. Withdraw money \n\t3.Print account summary \n\t4.Quit", @"^[1-4]$", "Invalid input. Enter a menu option from 1 - 4.");
+            // Prompt user to select menu option and Validate input
+            string userInput = PromptUserInput("1. Create new account \n2. Desposit money \n3. Withdraw money \n4. Transfer money \n5. Print account summary \n6. Quit", "\n\t***** Banking Menu *****");
+            int validatedInput = Validator.ValidateNumeric<int>(userInput, 1, 6);
 
-                // Switch options to manipulate user account
-                MenuOptions menuSelection = (MenuOptions)int.Parse(validatedInput);
+            // Users menu selection
+            MenuOptions menuSelection = (MenuOptions)validatedInput;
 
-                return menuSelection;
+            // return users selection
+            return menuSelection;
         }
 
         /// <summary>
-        /// This method prompts the user to enter a deposit amount, validates user input and calls the <c>Deposit</c>
-        /// method from the <c>Account</c> class to initiate the deposit.
-        /// <para>If succesfull, a success message is displayed. 
-        /// If unsuccesfull, an exception is displayed and caught. </para>
+        /// Prompts user for account name and initial account balance, reads and
+        /// validates user input. Creates a new account and adds the account to the bank
         /// </summary>
-        /// <param name="account">the object used to call the <c>Deposit</c> method to deposit funds into the account.</param>
-        /// <exception cref="InvalidOperationException">If the deposit amount is not greater than zero an exception is 
-        /// thrown, which is caught in the catch block of this method.
-        /// <para>User receives the message "Deposit failed. The amount must be greater than zero". </para>
-        public static void MakeDeposit(Account account)
+        /// <param name="bank">The bank to add the account to</param>
+        /// <exception cref="InvalidOperationException">if the account already exists</exception>
+        public static void CreateAccount(Bank bank)
         {
-            Console.WriteLine("\t***** Deposit Money *****\n");
+            // Regex account name validation expression
+            string regexExpression = @"^([A-Z]?[[a-z]{1,20})$|^([A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$|^([A-Z]?[[a-z]{1,20}\040[A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$";
+            // Error message, if the user input does not match the expression
+            string errorMessage = "Invalid input. Maximum three words. No numeric or symbolic characters allowed.";
 
-            // Validate deposit amount
-            decimal validatedInput = ValidateAmount("Enter deposit amount: ");
+            // Prompts user for account name and validates
+            string  userInput = PromptUserInput("Enter account name: ");
+            string accountName = Validator.RegexValidation(userInput, regexExpression, errorMessage);
 
-            // Call deposit method from Account class to initiate deposit
-            // if succesfull provide success message
-            // if unsuccesfull throw exception and catch 
+            // Prompts user for Initial acount balance and validates
+            string userInputAmount = PromptUserInput("Enter initial balance: ");
+            decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
+
+            // Creates a new account
+            Account account = new Account(amount, accountName);
+
+            // Tries to add account into the bank
             try
             {
-                bool success = account.Deposit(validatedInput);
-
-                if (success) Console.WriteLine("***** Deposit successful *****");
-
-                else throw new InvalidOperationException("Deposit failed. Deposit amount must be greater than zero.");
+                bank.AddAccount(account);
+                Console.WriteLine("Account name: {0} \n\t***** Account Succesfully Created *****\n", accountName);
             }
+
+            // If the account already exists displays the caught exception
             catch (InvalidOperationException ioe)
             {
                 Console.WriteLine(ioe.Message);
@@ -152,89 +90,228 @@ namespace BankingSystem_1
         }
 
         /// <summary>
-        /// This method prompts user to enter a withdrawal amount, validates user input and calls the <c>Withdraw/c>
-        /// method from the <c>Account</c> class to initiate withdrawal.
-        /// <para>If the withrawal is successful, a success message is displayed, otherwise exceptions with relevant 
-        /// messages are thrown and caught.</para>
+        /// Prompts user for account name, searches for the account in the
+        /// bank and returns the search result.
         /// </summary>
-        /// <param name="account">the object used to call the <c>Withdraw</c> method to withdraw funds from the account</param>
-        /// <exception cref="InvalidOperationException">If the deposit amount is less than zero or greater than account balance, 
-        /// the <c>MakeDeposit</c> method throws an exception that is caught in the catch block.
-        /// <para>if amount is not greater than zero: User receives the message: 
-        /// Withdrawal failed. Withdrawal amount must be greater than zero."
-        /// if the amount is greater than the account balalnce, user receives the message:
-        /// "Withdrawal failed. Insufficient funds in the account. Try a different amount."
-        /// User is then prompted to make another menu selections</para>
-        public static void MakeWithdrawal(Account account)
+        /// <param name="bank">bank in which to search the account</param>
+        /// <returns>either return the account address or null</returns>
+        private static Account FindAccount(Bank bank)
         {
-            Console.WriteLine("\t***** Withdraw Money *****\n");
+            // Prompt user for account name
+            string accountName = PromptUserInput("Enter account name: ");
 
-            // Validate deposit amount
-            decimal validatedAmount = ValidateAmount("Enter withdrawal amount: ");
+            // FInd if the account exists
+            Account account = bank.GetAccount(accountName);
 
-            // Initiate withdrawal:
-            // if succesfull, provide success message
-            // if unsuccesfull, throw exception and catch
-            try
+            // Return the result of the search
+            return account;
+        }
+
+        /// <summary>
+        /// Validates account and deposit amount.
+        /// If the account exists, initializes a deposit transaction 
+        /// and tries to make the deposit. 
+        /// If the account does not exist or the deposit fails, shows 
+        /// relevant error messages.
+        /// </summary>
+        /// <param name="bank">The bank which has the account in which
+        /// the deposit will be made</param>
+        /// <exception cref="InvalidOperationException">if the deposit fails.</exception>
+        public static void MakeDeposit(Bank bank)
+        {
+            Console.WriteLine("\t***** Deposit Money *****");
+
+            // Check if the account exists
+            Account account = FindAccount(bank);
+
+            // If the account does not exist
+            if (account == null) Console.WriteLine("\n***** Deposit could not be processed. Account does not exist  *****\n");  
+            
+            // else if the account exists
+            else
             {
-                bool success = account.Withdraw(validatedAmount);
+                // Prompt user for deposit amount and validate
+                string userInputAmount = PromptUserInput("Enter deposit amount: ");
+                decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
 
-                if (success) Console.WriteLine("***** Withdrawal successful *****");
+                // Initialize transaction for deposit
+                DepositTransaction deposit = new DepositTransaction(account, amount);
 
-                else
+                // Try to make the deposit
+                try
                 {
-                    if (validatedAmount <= 0) throw new InvalidOperationException("Withdrawal failed. Withdrawal amount must be greater than zero.");
-                    else throw new InvalidOperationException("Withdrawal failed. Insufficient funds in the account. Try a different amount.");
-                }               
-            }
-            catch (InvalidOperationException ioe)
-            {
-                Console.WriteLine(ioe.Message);
-            }
+                    bank.ExecuteTransaction(deposit);
+                }
+
+                // If it fails show error message
+                catch (InvalidOperationException ioe)
+                {
+                    Console.WriteLine(ioe.Message);
+                }
+            }         
         }
 
         /// <summary>
-        /// This method calls the <c>TOString()</c> method from the <c>Account</c> class to print users Account summary.
+        /// Validates account and withdrawal amount.
+        /// If the account exists, initializes a withdrawal transaction 
+        /// and tries to make the deposit. 
+        /// If the account does not exist or the withdrawal fails, shows 
+        /// relevant error messages.
         /// </summary>
-        /// <param name="account">the object used to call the <c>ToString</c> method fro mthe <c>Account</c> class</param>
-        public static void PrintSummary(Account account)
+        /// <param name="bank">The bank which has the account from which the 
+        /// withdrawal will be made</param>
+        /// <exception cref="InvalidOperationException">if the withdrawal fails.</exception>
+        public static void MakeWithdrawal(Bank bank)
         {
-            Console.WriteLine("\t***** My Bank *****\n");
+            Console.WriteLine("\t***** Withdraw Money *****");
 
-            Console.WriteLine(account.ToString());
+            // Check if the account exist
+            Account account = FindAccount(bank);
+
+            // If account does not exist
+            if (account == null) Console.WriteLine("\n***** Withdrawal could not be processed. Withdrawal account does not exist  *****\n");
+
+            // else if account exists
+            else
+            {
+                // Prompt user for withdrawal amount and validate
+                string userInputAmount = PromptUserInput("Enter withdrawal amount: ");
+                decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
+
+                // Initialize transaction for withdrawal
+                WithdrawTransaction withdraw = new WithdrawTransaction(account, amount);
+
+                // try to make withdrawal
+                try
+                {
+                    bank.ExecuteTransaction(withdraw);
+                }
+
+                // if it fails show error message
+                catch (InvalidOperationException ioe)
+                {
+                    Console.WriteLine(ioe.Message);
+                }
+            }
+        }
+
+        /// <summary>Transfers money between two accounts</summary>
+        /// <para>
+        /// Validates from account, to account and withdrawal amount.
+        /// If the accounts exists, initializes a transfer transaction 
+        /// and tries to make the transfer. 
+        /// If any of the accounts do not exist or the transfer fails, shows 
+        /// relevant error messages.
+        /// </para>
+        /// <param name="bank">The bank which has the accounts between which the 
+        /// transfer will take place</param>
+        /// <exception cref="InvalidOperationException">if the transfer fails.</exception>
+        public static void MakeTransfer(Bank bank)
+        {
+
+            Console.WriteLine("\t***** Transfer Money *****");
+      
+            Account fromAccount, toAccount;
+
+            // Check if the from and to accounts exist
+            fromAccount = FindAccount(bank);
+            toAccount = FindAccount(bank);
+
+            // If any of the accounts or both the accounts do not exist,
+            // display the relevant error message
+            if (fromAccount == null || toAccount == null)
+            {
+                if (fromAccount == null) Console.WriteLine("***** Transfer not possible. Account named '{0}' does not exist *****", fromAccount.Name);
+                if (toAccount == null) Console.WriteLine("***** Transfer not possible. Account named '{0}' does not exist *****", toAccount.Name);
+                if (fromAccount == null && toAccount == null) Console.WriteLine("***** Transfer not possible. Accounts named '{0}' and '{1}' do not exist *****", fromAccount.Name, toAccount.Name);
+            }
+
+            // Else if both accounts exist 
+            else
+            {
+                // Prompt user for transfer amount and validate
+                string userInputAmount = PromptUserInput("Enter transfer amount: ");
+                decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
+
+                // Initialize the transaction for transfer
+                TransferTransaction transfer = new TransferTransaction(fromAccount, toAccount, amount);
+
+                // Try to make the transfer
+                try
+                {
+                    bank.ExecuteTransaction(transfer);
+                }
+
+                // If it fails display relevant error message
+                catch (InvalidOperationException ioe)
+                { 
+                    Console.WriteLine(ioe.Message);
+                }
+            }  
         }
 
         /// <summary>
-        /// This is the entry point of the Banking system Testing
+        /// prompts user for account name. If the account exists displays 
+        /// the account summary, else shows error message
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="bank">the bank which has the account that the user 
+        /// wants the account summary for</param>
+        public static void PrintSummary(Bank bank)
+        {
+            // Check if the account exists
+            Account account = FindAccount(bank);
+
+            // If the account does not exist
+            if (account == null) Console.WriteLine("\n***** The account does not exist *****\n"); 
+
+            // Else if the account exists
+            else
+            {
+                Console.WriteLine("\t***** My Bank *****\n");
+
+                // Print account summary
+                Console.WriteLine(account.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Entry point of the Banking system
+        /// </summary>
         static void Main(string[] args)
         {
+            // Create bank
+            Bank bank = new Bank();
+
+            // Create menu options
             MenuOptions menuOptions;
 
-            //Prompt user for account name and data validation
-            string validatedInput = RegexValidation("Enter account name: ", @"^([A-Z]?[[a-z]{1,20})$|^([A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$|^([A-Z]?[[a-z]{1,20}\040[A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$", "Invalid input. Maximum three words. No numeric or symbolic characters allowed.");
-
-            // Account instance
-            Account account = new Account(0, validatedInput);
-
-            // Bank menu options
+            // Repeat menu options
             do
             { 
+                // Prompt user to choose menu and validate
                 menuOptions = ReadUserInput();
 
+                // Menu options
                 switch (menuOptions-1)
                 {
+                    case MenuOptions.CREATE_NEW_ACCOUNT:
+                        CreateAccount(bank);
+                        break;
+
                     case MenuOptions.DEPOSIT_MONEY:
-                        MakeDeposit(account);
+                        MakeDeposit(bank);
                         break;
 
                     case MenuOptions.WITHDRAW_MONEY:
-                        MakeWithdrawal(account);
+                        MakeWithdrawal(bank);
+                        break;
+
+                    case MenuOptions.TRANSFER_MONEY:
+                        MakeTransfer(bank);
                         break;
                        
                     case MenuOptions.PRINT_SUMMARY:
-                        PrintSummary(account);
+                        PrintSummary(bank);
                         break;
 
                     case MenuOptions.QUIT:
