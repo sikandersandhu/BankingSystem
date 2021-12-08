@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using System.Xml;
 
-namespace BankingSystem_Iteration2
+namespace BankingSystem_Iteration3
 {   /// <summary>
 /// The instance from this class has two roles. 
 /// First, to add new accounts to the 
@@ -14,12 +16,35 @@ namespace BankingSystem_Iteration2
 /// Second, The overriden ExecuteTransaction method, calls methods from the DepositTransaction,
 /// WithdrawTransaction and TransferTransaction classes to execute transaction.
 /// </summary>
+    //[Serializable]
     class Bank
     {
         /// <summary>
         /// this field is a list of type Account, into which accounts will be added
         /// </summary>
         private List<Account> _accounts;
+        [XmlArray(ElementName = "List of accounts")]
+        [XmlArrayItem(ElementName = "Account Name", Namespace = "BankingSystem_Iteration3", IsNullable = true)]
+        public List<Account> Accounts
+        {
+            get => _accounts;
+            set
+            {
+                _accounts = value;
+            }
+        }
+
+        private List<Transaction> _transactions;
+        [XmlArray(ElementName = "List of transactions")]
+        [XmlArrayItem(ElementName = "Transactions", Namespace = "BankingSystem_Iteration3", IsNullable = true)]
+        public List<Transaction> Transactions
+        {
+            get => _transactions;
+            set
+            {
+                _transactions = value;
+            }
+        }
 
         /// <summary>
         /// This constructor initializes a new list of Account type
@@ -27,6 +52,7 @@ namespace BankingSystem_Iteration2
         public Bank()
         {
             _accounts = new List<Account>();
+            _transactions = new List<Transaction>();
         }
 
         /// <summary>
@@ -76,30 +102,33 @@ namespace BankingSystem_Iteration2
         }
 
         /// <summary>
-        /// Calls the Execute method to deposit funds, using the DepositTransaction object.
-        /// </summary>
-        /// <param name="deposit">Initialized DepositTransaction object, to be used to execute deposit</param>
-        public void ExecuteTransaction(DepositTransaction deposit)
-        {
-            deposit.Execute();
-        }
-
-        /// <summary>
-        /// Calls the Execute method to withdraw funds, using the WithdrawTransaction object.
-        /// </summary>
-        /// <param name="deposit">Initialized WithdrawTransaction object, to be used to execute withdrawal</param>
-        public void ExecuteTransaction(WithdrawTransaction withdraw)
-        {
-            withdraw.Execute();
-        }
-
-        /// <summary>
         /// Calls the Execute method to transfer funds, using the TransferTransaction object.
         /// </summary>
         /// <param name="deposit">Initialized TransferTransaction object, to be used to execute transfer</param>
-        public void ExecuteTransaction(TransferTransaction transfer)
+        public void ExecuteTransaction(Transaction transaction)
         {
-            transfer.Execute();
+            // Adds transactions to the list of transactions
+            _transactions.Add(transaction);
+            // Execute the transaction
+            transaction.Execute();
+        }
+
+        public void RollbackTransaction(Transaction transaction)
+        {
+            // Adds transactions to the list of transactions
+            _transactions.Add(transaction);
+            // Execute the transaction
+            transaction.Rollback();
+        }
+
+        public void PrintTransactionHistory()
+        {
+            if (_transactions != null)
+            {
+                // Prints transactions starting from the latest.
+                for (int i = _transactions.Count - 1; i >= 0; i--) _transactions[i].Print();
+            }
+            else Console.WriteLine("There are currently no transactions to print.");
         }
     }
 }
