@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankingSystem_Iteration2
+namespace BankingSystem_Iteration3
 {
     /// <summary>
     /// The methods in this class merely call methods from the account class to 
@@ -15,62 +15,39 @@ namespace BankingSystem_Iteration2
     /// - Rollback withdrawal by calling Deposit()
     /// - Print account summary by calling ToString()
     /// </summary>
-    class WithdrawTransaction
+    class WithdrawTransaction: Transaction
     {
         /// <summary>
         /// This field will be initialized with the account from which the 
         /// withdrawal is to be made
         /// </summary>
         private Account _account;
+
         /// <summary>
-        /// This field is initialized with the decimal amount to be withdrawn
-        /// from the account
+        /// Stores the account balance snapshot 
+        /// during the object initialization.
+        /// Initialized in the constructor.
         /// </summary>
-        private decimal _amount;
-        /// <summary>
-        /// Strores the true/false status of the execution of withdrawal
-        /// </summary>
-        private bool _executed;
-        /// <summary>
-        /// Public property to read the execution status of withdrawal
-        /// </summary>
-        public bool Executed
-        {
-            get { return _executed; }
-        }
-        /// <summary>
-        /// Stores the true/false status of the success of withdrawal
-        /// </summary>
-        private bool _success;
+        private readonly decimal _currBalance;
+
         /// <summary>
         /// Public property to read the success status of the withdrawal
         /// </summary>
-        public bool Success
+        public override bool Success
         {
             get { return _success; }
         }
-        /// <summary>
-        /// Strores the true/false status of the reversal of the withdrawal transaction
-        /// </summary>
-        private bool _reversed;
-        /// <summary>
-        /// public property to read the reversed status of the withdrawal 
-        /// </summary>
-        public bool Reversed
-        {
-            get { return _reversed; }
-        }
-
+        
         /// <summary>
         /// This constructor initializes the the <c>_account</c> and <c>_amount</c> fields 
         /// of a new <c>WithdrawTransaction</c> class instance. 
         /// </summary>
         /// <param name="account">The account object to Withdraw amount from</param>
         /// <param name="amount">The amount to be withdrawn from the account</param>
-        public WithdrawTransaction(Account account, decimal amount)
+        public WithdrawTransaction(Account account, decimal amount): base(amount)
         {
             _account = account;
-            _amount = amount;
+            _currBalance = _account.Balance;
         }
 
         /// <summary>
@@ -81,11 +58,12 @@ namespace BankingSystem_Iteration2
         /// <exception cref="InvalidOperationException">This exceptions is thrown
         /// if the withdrawal failed, or if there are insufficient funds in the 
         /// account, or if the withdrawal has already been executed.</exception>
-        public void Execute()
+        public override void Execute()
         {
             // If the withdrawal has not yet taken place
             if (!Executed)
             {
+                base.Execute();
                 // makes withdrawal and store the status
                 bool succeeded = _account.Withdraw(_amount);
 
@@ -94,16 +72,13 @@ namespace BankingSystem_Iteration2
                 {
                     // changes the executed and success status to true
                     // prints account summary
-                    _executed = true;
                     _success = true;
-                    Print();
                 }
 
                 // if withdrawal failed
                 else
                 {
                     // prints the account summary and throw the relevant exception
-                    Print();
                     if (_amount <= 0) throw new InvalidOperationException("\nWithdrawal amount must be greater than zero.");
                     else throw new InvalidOperationException("\nInsufficient funds in the account. Try a different amount.");
                 }
@@ -119,23 +94,18 @@ namespace BankingSystem_Iteration2
         /// </summary>
         /// <exception cref="InvalidOperationException">This exception is thrown if the 
         /// reversal fails, or if the reversal has already been executed</exception>
-        public void Rollback()
+        public override void Rollback()
         {
             // If the reversal has not yet taken place
             if (!Reversed)
             {
+                // changes the status of reversed to true
+                base.Rollback();
                 // rollsback the withdrawal and saves status
                 bool succeeded = _account.Deposit(_amount);
 
                 // if rollback succesfull
-                if (succeeded)
-                {
-                    // changes the status of reversed to true
-                    _reversed = true;
-                }
-
-                //if rollback failed, throw the following exception
-                else throw new InvalidOperationException("Rollback failed. Could not deposit funds");
+                if (!succeeded) throw new InvalidOperationException("Rollback failed. Could not deposit funds");
             }
             // if the rollback has already raken place, throw the following exception
             else throw new InvalidOperationException("The amount has already been succesfully deposited.");
@@ -144,16 +114,18 @@ namespace BankingSystem_Iteration2
         /// <summary>
         /// Prints the success or failed status of the withdrawal attempt and prints the account summary.
         /// </summary>
-        public void Print()
+        public override void Print()
         {
             if (Success)
             {
-                Console.WriteLine("\n***** Withdrawal successful *****\n");
-                Console.WriteLine(_account.ToString());
+                Console.WriteLine("\t***** Account Summary *****\n");
+                Console.WriteLine("** {0} ** Withdrawal successful **\n", DateStamp.ToString());
+                Console.WriteLine("Account name: {0}\nWithdrawal amount: {1:c}\nAccount balance: {2:c}", _account.Name, _amount, _currBalance - _amount);
             }
             else
             {
-                Console.WriteLine("\n***** Withdrawal failed *****\n");
+                Console.WriteLine("\t***** Account Summary *****\n");
+                Console.WriteLine("{0}  ** Withdrawal failed **\n", DateStamp.ToString());
                 Console.WriteLine(_account.ToString());
             }
         }
