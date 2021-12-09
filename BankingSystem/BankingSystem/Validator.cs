@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
-namespace BankingSystem_Iteration2
+namespace BankingSystem_Iteration3
 {
     /// <summary>
     /// Static class for validator methods
