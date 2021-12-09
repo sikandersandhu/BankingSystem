@@ -1,20 +1,92 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
+using System.Xml;
+using System.IO;
 
-namespace BankingSystem_Iteration2
+namespace BankingSystem_Iteration3
 {
-    /// <summary>
-    /// This public enumerated type <c>Menu</c> represent menu options
-    /// <para>used in the switch case statements to provide menu options functionality.</para>
-    /// <see cref="switch"/>
-    /// </summary>
-    public enum MenuOptions { CREATE_NEW_ACCOUNT, DEPOSIT_MONEY, WITHDRAW_MONEY, TRANSFER_MONEY, PRINT_SUMMARY, QUIT };
-
     /// <summary>
     /// Tester class for banking system
     /// </summary>
     class BankingSystem
-    {
+    {    
+        
+        /// <summary>
+        /// Entry point of the Banking system
+        /// </summary>
+        static void Main(string[] args)
+        {
+            // Create bank
+            Bank bank = new();
+            /*try
+            {
+                XmlDeserializer(out bank, @"BankData");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The following error occured: {0}\nMore details: {1}\nMessage: {2}", e.GetType().ToString(), e.InnerException.ToString(), e.Message);
+            }*/
+
+            // Display bank menu
+            BankMenu(bank);
+        }
+
+        public static void BankMenu(Bank bank)
+        {
+
+            // Create menu options
+            MenuOptions menuOptions;
+
+            // Repeat menu options
+            do
+            {
+                // Prompt user to choose menu and validate
+                menuOptions = ReadMenuSelection();
+
+                // Menu options
+                switch (menuOptions - 1)
+                {
+                    case MenuOptions.CREATE_NEW_ACCOUNT:
+                        CreateAccount(bank);
+                        break;
+
+                    case MenuOptions.DEPOSIT_MONEY:
+                        MakeDeposit(bank);
+                        break;
+
+                    case MenuOptions.WITHDRAW_MONEY:
+                        MakeWithdrawal(bank);
+                        break;
+
+                    case MenuOptions.TRANSFER_MONEY:
+                        MakeTransfer(bank);
+                        break;
+
+                    case MenuOptions.PRINT_SUMMARY:
+                        PrintSummary(bank);
+                        break;
+
+                    case MenuOptions.PRINT_TRANSACTION_HISTORY:
+                        PrintTransactionHistory(bank);
+                        break;
+
+                    case MenuOptions.QUIT:
+                        Console.WriteLine("\t***** My Bank *****\n");
+                        Console.WriteLine("Thanks for banking with us. Good day.");
+                        try
+                        {
+                            XmlSerializer(bank);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("The following error occured: {0}\nMore details: {1}\nMessage: {2}", e.GetType().ToString(), e.InnerException.ToString(), e.Message);
+                        }
+                        break;
+                }
+            } while (menuOptions - 1 != MenuOptions.QUIT);
+        }
+
         /// <summary>
         /// Displays a message to the user, reads user input and return it.
         /// </summary>
@@ -27,7 +99,7 @@ namespace BankingSystem_Iteration2
             {
                 Console.WriteLine(heading);
                 Console.WriteLine();
-            }           
+            }
             Console.WriteLine(message);
             return (Console.ReadLine());
         }
@@ -38,11 +110,11 @@ namespace BankingSystem_Iteration2
         /// <returns>returns a validated enum <c>MenuOptions</c> value. 
         /// <remarks>this value is used by the switch case options for menu functionality</remarks>
         /// </returns>
-        public static MenuOptions ReadUserInput()
+        public static MenuOptions ReadMenuSelection()
         {
             // Prompt user to select menu option and Validate input
-            string userInput = PromptUserInput("1. Create new account \n2. Desposit money \n3. Withdraw money \n4. Transfer money \n5. Print account summary \n6. Quit", "\n\t***** Banking Menu *****");
-            int validatedInput = Validator.ValidateNumeric<int>(userInput, 1, 6);
+            string userInput = PromptUserInput("1. Create new account \n2. Desposit money \n3. Withdraw money \n4. Transfer money \n5. Print account summary \n6. Print transaction history \n7. Quit", "\n\t***** Banking Menu *****");
+            int validatedInput = Validator.ValidateNumeric<int>(userInput, 1, 7);
 
             // Users menu selection
             MenuOptions menuSelection = (MenuOptions)validatedInput;
@@ -65,7 +137,7 @@ namespace BankingSystem_Iteration2
             string errorMessage = "Invalid input. Maximum three words. No numeric or symbolic characters allowed.";
 
             // Prompts user for account name and validates
-            string  userInput = PromptUserInput("Enter account name: ");
+            string userInput = PromptUserInput("Enter account name: ");
             string accountName = Validator.RegexValidation(userInput, regexExpression, errorMessage);
 
             // Prompts user for Initial acount balance and validates
@@ -79,7 +151,8 @@ namespace BankingSystem_Iteration2
             try
             {
                 bank.AddAccount(account);
-                Console.WriteLine("Account name: {0} \n\t***** Account Succesfully Created *****\n", accountName);
+                Console.WriteLine("\n\t***** Account Created *****\n", accountName);
+                Console.WriteLine(account.ToString());
             }
 
             // If the account already exists displays the caught exception
@@ -124,31 +197,34 @@ namespace BankingSystem_Iteration2
             // Check if the account exists
             Account account = FindAccount(bank);
 
-            // If the account does not exist
-            if (account == null) Console.WriteLine("\n***** Deposit could not be processed. Account does not exist  *****\n");  
-            
-            // else if the account exists
-            else
-            {
-                // Prompt user for deposit amount and validate
-                string userInputAmount = PromptUserInput("Enter deposit amount: ");
-                decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
+            // Prompt user for deposit amount and validate
+            string userInputAmount = PromptUserInput("Enter deposit amount: ");
+            decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
 
+            try
+            {
                 // Initialize transaction for deposit
-                DepositTransaction deposit = new DepositTransaction(account, amount);
+                Transaction deposit = new DepositTransaction(account, amount);
 
                 // Try to make the deposit
                 try
                 {
                     bank.ExecuteTransaction(deposit);
+                    deposit.Print();
                 }
 
                 // If it fails show error message
                 catch (InvalidOperationException ioe)
                 {
+                    deposit.Print();
                     Console.WriteLine(ioe.Message);
                 }
-            }         
+            }
+            catch(NullReferenceException)
+            {
+                Console.WriteLine("\n***** Deposit failed. Account does not exist  *****\n");
+            }               
+          
         }
 
         /// <summary>
@@ -168,31 +244,34 @@ namespace BankingSystem_Iteration2
             // Check if the account exist
             Account account = FindAccount(bank);
 
-            // If account does not exist
-            if (account == null) Console.WriteLine("\n***** Withdrawal could not be processed. Withdrawal account does not exist  *****\n");
+            // Prompt user for withdrawal amount and validate
+            string userInputAmount = PromptUserInput("Enter withdrawal amount: ");
+            decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
 
-            // else if account exists
-            else
+            try
             {
-                // Prompt user for withdrawal amount and validate
-                string userInputAmount = PromptUserInput("Enter withdrawal amount: ");
-                decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
-
                 // Initialize transaction for withdrawal
-                WithdrawTransaction withdraw = new WithdrawTransaction(account, amount);
+                Transaction withdraw = new WithdrawTransaction(account, amount);
 
                 // try to make withdrawal
                 try
                 {
                     bank.ExecuteTransaction(withdraw);
+                    withdraw.Print();
                 }
 
                 // if it fails show error message
                 catch (InvalidOperationException ioe)
                 {
+                    withdraw.Print();
                     Console.WriteLine(ioe.Message);
                 }
             }
+            catch (NullReferenceException)
+            {
+                Console.WriteLine("\n***** Withdrawal failed. Account does not exist  *****\n");
+            }
+         
         }
 
         /// <summary>Transfers money between two accounts</summary>
@@ -210,44 +289,42 @@ namespace BankingSystem_Iteration2
         {
 
             Console.WriteLine("\t***** Transfer Money *****");
-      
+
             Account fromAccount, toAccount;
 
             // Check if the from and to accounts exist
             fromAccount = FindAccount(bank);
             toAccount = FindAccount(bank);
 
-            // If any of the accounts or both the accounts do not exist,
-            // display the relevant error message
-            if (fromAccount == null || toAccount == null)
-            {
-                if (fromAccount == null) Console.WriteLine("***** Transfer not possible. Account named '{0}' does not exist *****", fromAccount.Name);
-                if (toAccount == null) Console.WriteLine("***** Transfer not possible. Account named '{0}' does not exist *****", toAccount.Name);
-                if (fromAccount == null && toAccount == null) Console.WriteLine("***** Transfer not possible. Accounts named '{0}' and '{1}' do not exist *****", fromAccount.Name, toAccount.Name);
-            }
+            // Prompt user for transfer amount and validate
+            string userInputAmount = PromptUserInput("Enter transfer amount: ");
+            decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
 
-            // Else if both accounts exist 
-            else
+            try
             {
-                // Prompt user for transfer amount and validate
-                string userInputAmount = PromptUserInput("Enter transfer amount: ");
-                decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
-
                 // Initialize the transaction for transfer
-                TransferTransaction transfer = new TransferTransaction(fromAccount, toAccount, amount);
+                Transaction transfer = new TransferTransaction(fromAccount, toAccount, amount);
 
                 // Try to make the transfer
                 try
                 {
                     bank.ExecuteTransaction(transfer);
+                    transfer.Print();
                 }
 
                 // If it fails display relevant error message
                 catch (InvalidOperationException ioe)
-                { 
+                {
+                    if (transfer.Executed && !transfer.Success) bank.RollbackTransaction(transfer);
+
+                    transfer.Print();
                     Console.WriteLine(ioe.Message);
                 }
-            }  
+            }
+            catch (NullReferenceException)
+            {
+                Console.WriteLine("Transfer failed. One or more accounts you entered, do not exist.");
+            }            
         }
 
         /// <summary>
@@ -262,7 +339,7 @@ namespace BankingSystem_Iteration2
             Account account = FindAccount(bank);
 
             // If the account does not exist
-            if (account == null) Console.WriteLine("\n***** The account does not exist *****\n"); 
+            if (account == null) Console.WriteLine("\n***** The account does not exist *****\n");
 
             // Else if the account exists
             else
@@ -274,52 +351,52 @@ namespace BankingSystem_Iteration2
             }
         }
 
-        /// <summary>
-        /// Entry point of the Banking system
-        /// </summary>
-        static void Main(string[] args)
+        public static void PrintTransactionHistory(Bank bank)
         {
-            // Create bank
-            Bank bank = new Bank();
+            bank.PrintTransactionHistory();
+        }
 
-            // Create menu options
-            MenuOptions menuOptions;
+        public static void XmlSerializer(Bank bank)
+        {
+            // Creates a new XmlSerializer to serialize a stream
+            XmlSerializer s = new (typeof(Bank));
 
-            // Repeat menu options
-            do
-            { 
-                // Prompt user to choose menu and validate
-                menuOptions = ReadUserInput();
+            // FileStream is needed to open a file that can be written to.
+            FileStream fStream = File.Open(@"BankData", FileMode.Create, FileAccess.Write);
 
-                // Menu options
-                switch (menuOptions-1)
-                {
-                    case MenuOptions.CREATE_NEW_ACCOUNT:
-                        CreateAccount(bank);
-                        break;
+            // StreamWriter is needed to create a stream that will be writen to file
+            StreamWriter sWriter = new (fStream);
+            
+            // Serializes the Bank Lists to xml doc
+            s.Serialize(sWriter, bank);
 
-                    case MenuOptions.DEPOSIT_MONEY:
-                        MakeDeposit(bank);
-                        break;
+            //Closes resources
+            sWriter.Close();
+            fStream.Close();
+        }
+        public static void XmlDeserializer(out Bank bank, string fileName)
+        {
+            // Creates a new XmlSerializer
+            XmlSerializer s = new(typeof(Bank));
 
-                    case MenuOptions.WITHDRAW_MONEY:
-                        MakeWithdrawal(bank);
-                        break;
+            // Opens the file to read from 
+            FileStream fStream = File.Open(fileName, FileMode.Open, FileAccess.Read);
 
-                    case MenuOptions.TRANSFER_MONEY:
-                        MakeTransfer(bank);
-                        break;
-                       
-                    case MenuOptions.PRINT_SUMMARY:
-                        PrintSummary(bank);
-                        break;
+            // Reads from the file
+            StreamReader sRead = new(fStream);
 
-                    case MenuOptions.QUIT:
-                        Console.WriteLine("\t***** My Bank *****\n");
-                        Console.WriteLine("Thanks for banking with us. Good day.");
-                        break;
-                }
-            } while (menuOptions-1 != MenuOptions.QUIT);
+            // Deserializes xml doc to a new instance of bank
+            bank = (Bank)s.Deserialize(sRead);
+
+            sRead.Close();
+            fStream.Close();
         }
     }
+
+    /// <summary>
+    /// This public enumerated type <c>Menu</c> represent menu options
+    /// <para>used in the switch case statements to provide menu options functionality.</para>
+    /// <see cref="switch"/>
+    /// </summary>
+    public enum MenuOptions { CREATE_NEW_ACCOUNT, DEPOSIT_MONEY, WITHDRAW_MONEY, TRANSFER_MONEY, PRINT_SUMMARY, PRINT_TRANSACTION_HISTORY, QUIT };
 }
