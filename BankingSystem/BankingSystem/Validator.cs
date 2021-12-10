@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
-namespace BankingSystem_Iteration4_serializing
+namespace BankingSystem_Iteration5_AddAccountTypes
 {
     /// <summary>
     /// Static class for validator methods
@@ -48,7 +48,6 @@ namespace BankingSystem_Iteration4_serializing
             // Returns the validated int or decimal amount
             return (T) Convert.ChangeType(userInput, typeof(T));           
         }
-
         /// <summary>
         /// Generic validator, validates int or decimal amount within a range
         /// </summary>
@@ -78,7 +77,6 @@ namespace BankingSystem_Iteration4_serializing
             // returns validated input within the range
             return input;
         }
-
         /// <summary>
         /// Regex user input validator
         /// </summary>
