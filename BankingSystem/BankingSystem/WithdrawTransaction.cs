@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using System.Xml;
 
-namespace BankingSystem_Iteration3
+namespace BankingSystem_Iteration4_serializing
 {
     /// <summary>
     /// The methods in this class merely call methods from the account class to 
@@ -15,12 +17,14 @@ namespace BankingSystem_Iteration3
     /// - Rollback withdrawal by calling Deposit()
     /// - Print account summary by calling ToString()
     /// </summary>
+    [DataContract]
     class WithdrawTransaction: Transaction
     {
         /// <summary>
         /// This field will be initialized with the account from which the 
         /// withdrawal is to be made
         /// </summary>
+        [DataMember(Name = "Account")]
         private Account _account;
 
         /// <summary>
@@ -28,11 +32,13 @@ namespace BankingSystem_Iteration3
         /// during the object initialization.
         /// Initialized in the constructor.
         /// </summary>
-        private readonly decimal _currBalance;
+        [DataMember(Name = "Post_Transaction_Balance")]
+        private readonly decimal _postTransactionBalance;
 
         /// <summary>
         /// Public property to read the success status of the withdrawal
         /// </summary>
+        [DataMember]
         public override bool Success
         {
             get { return _success; }
@@ -47,7 +53,7 @@ namespace BankingSystem_Iteration3
         public WithdrawTransaction(Account account, decimal amount): base(amount)
         {
             _account = account;
-            _currBalance = _account.Balance;
+            _postTransactionBalance = _account.Balance - _amount;
         }
 
         /// <summary>
@@ -120,7 +126,7 @@ namespace BankingSystem_Iteration3
             {
                 Console.WriteLine("\t***** Account Summary *****\n");
                 Console.WriteLine("** {0} ** Withdrawal successful **\n", DateStamp.ToString());
-                Console.WriteLine("Account name: {0}\nWithdrawal amount: {1:c}\nAccount balance: {2:c}", _account.Name, _amount, _currBalance - _amount);
+                Console.WriteLine("Account name: {0}\nWithdrawal amount: {1:c}\nAccount balance: {2:c}", _account.Name, _amount, _postTransactionBalance);
             }
             else
             {
