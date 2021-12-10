@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Xml;
 
-namespace BankingSystem_Iteration4_serializing
+namespace BankingSystem_Iteration5_AddAccountTypes
 {
     [DataContract]
     [KnownType(typeof(WithdrawTransaction))]
@@ -20,13 +20,11 @@ namespace BankingSystem_Iteration4_serializing
         /// </summary>
         [DataMember(Name = "Transaction_Amount")]
         protected decimal _amount;
-
         /// <summary>
         /// Protected field stores the true/false status of the success of transaction
         /// ( only accessible to the derived classes )
         /// </summary>
-        /// 
-        
+        ///         
         [DataMember(Name = "Success")]
         protected bool _success;   
         /// <summary>
@@ -34,7 +32,6 @@ namespace BankingSystem_Iteration4_serializing
         /// Abstract property to be set in the derived class. 
         /// </summary>
         public abstract bool Success { get; }
-
         /// <summary>
         /// Strores the true/false status of the execution of the transaction
         /// </summary>
@@ -47,7 +44,6 @@ namespace BankingSystem_Iteration4_serializing
         {
             get { return _executed; }
         }
-
         /// <summary>
         /// Strores the true/false status of the reversal of the transaction
         /// </summary>
@@ -60,7 +56,6 @@ namespace BankingSystem_Iteration4_serializing
         {
             get { return _reversed; }
         }
-
         /// <summary>
         /// Stores the date and time when the transaction took place
         /// </summary>
@@ -73,20 +68,16 @@ namespace BankingSystem_Iteration4_serializing
         {
             get { return _dateStamp; }
         }
-
         public Transaction ( decimal amount)
         {
             _amount = amount;
         }
-
         public abstract void Print();
-
         public virtual void Execute()
         {
             _dateStamp = DateTime.Now;
             _executed = true;
         }
-
         public virtual void Rollback()
         {
             _dateStamp = DateTime.Now;
