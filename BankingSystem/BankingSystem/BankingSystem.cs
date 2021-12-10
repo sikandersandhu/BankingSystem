@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using System.Xml;
 using System.IO;
 
-namespace BankingSystem_Iteration5_AddAccountTypes
+namespace BankingSystem
 {
     /// <summary>
     /// Tester class for banking system
@@ -20,18 +20,48 @@ namespace BankingSystem_Iteration5_AddAccountTypes
             Bank bank = new();
 
             // Deserialises transactions history and account details
-            try
+            /*try
             {
                 Deserialize(out bank, @"BankData");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-            }
-
+            }*/
+			
             // Displays bank menu
             ExecuteBankMenu(bank);
         }
+
+        // Displays bank menu options and returns user selection
+        public static BankMenuOption BankMenu()
+        {
+            // Prompt user to select menu option and Validate input
+            string userInput = Validator.PromptUserInput("1.  Create new account \n2.  Delete account \n\n3.  Add account holder \n4.  Remove account holder \n\n5.  Subscribe: Account notifications \n6.  Unsubscribe: Account notifications \n\n7.  Desposit money \n8.  Withdraw money \n9.  Transfer money \n\n10. Credit account: Make purchase \n" +
+                "11. Credit account: Make payment \n\n12. Term deposit account: Calculate interest \n13. Term Deposit Account: Add interest \n\n14. Print account summary \n15. Print transaction history \n\n16. Quit", "\n\t***** Banking Menu *****");
+            int validatedInput = Validator.ValidateNumeric<int>(userInput, 1, 16);
+
+            // Users menu selection
+            BankMenuOption userSelection = (BankMenuOption)validatedInput;
+
+            // return users selection
+            return userSelection;
+        }
+        // Displays account menu options and returns user selection
+        public static AccountMenuOption AccountMenu()
+        {
+            // Prompt user to select menu option and Validate input
+            string userInput = Validator.PromptUserInput("\n\n\t***** Account Menu *****\n\n1. Create Credit Account \n2. Create Savings Account \n3. Create term deposit account \n4. Quit\n");
+            int validatedInput = Validator.ValidateNumeric<int>(userInput, 1, 4);
+
+            // Users menu selection
+            AccountMenuOption userSelection = (AccountMenuOption)validatedInput;
+
+            // return users selection
+            return userSelection;
+        }
+
+        // Bank: Executes user selection by calling relevant static method
         public static void ExecuteBankMenu(Bank bank)
         {
 
@@ -50,6 +80,21 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                     case BankMenuOption.CREATE_NEW_ACCOUNT:
                         ExecuteAccountMenu(bank);
                         break;
+                    case BankMenuOption.REMOVE_ACCOUNT:
+                        RemAccount(bank);
+                        break;
+                    case BankMenuOption.ADD_ACCOUNT_HOLDER:
+                        AddAccountHolder(bank);
+                        break;
+                    case BankMenuOption.REMOVE_ACCOUNT_HOLDER:
+                        RemAccountHolder(bank);
+                        break;
+                    case BankMenuOption.ADD_SUBSCRIBER:
+                        AddSubscriber(bank);
+                        break;
+                    case BankMenuOption.REMOVE_SUBSCRIBER:
+                        RemSubscriber(bank);
+                        break;
                     case BankMenuOption.DEPOSIT_MONEY:
                         MakeDeposit<SavingsAccount>(bank);
                         break;
@@ -67,7 +112,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                         break;
                     case BankMenuOption.TERM_DEPOSIT_CALCULATE_INTEREST:
                         Account _ = CalculateInterest(bank, out decimal interest, out int days);
-                        Console.WriteLine("\t***** Calculate interest *****\n\nInterest on {0} days is: {1:C}", days, interest);                        
+                        Console.WriteLine("\t***** Calculate interest *****\n\nInterest on {0} days is: {1:C}", days, interest);
                         break;
                     case BankMenuOption.TERM_DEPOSIT_ADD_INTEREST:
                         DepositInterest(bank);
@@ -85,7 +130,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                         {
                             Serialize(bank);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             Console.WriteLine(e.Message);
                         }
@@ -93,6 +138,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                 }
             } while (menuOptions - 1 != BankMenuOption.QUIT);
         }
+        // Account: Executes user selection by calling relevant static method
         public static void ExecuteAccountMenu(Bank bank)
         {
             // Menu options type variable
@@ -117,176 +163,456 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                         Console.WriteLine("Thank you for choosing your new account with us!");
                         break;
                 }
-            } while (userSelection != AccountMenuOption.QUIT);           
+            } while (userSelection != AccountMenuOption.QUIT);
         }
-        /// <summary>
-        /// Displays a message to the user, reads user input and return it.
-        /// </summary>
-        /// <param name="message">Message to prompt user for input</param>
-        /// <param name="heading">Optional heading string</param>
-        /// <returns></returns>
-        public static string PromptUserInput(string message, string heading = null)
-        {
-            if (heading != null)
-            {
-                Console.WriteLine(heading);
-                Console.WriteLine();
-            }
-            Console.WriteLine(message);
-            return (Console.ReadLine());
-        }
-        /// <summary>
-        /// Displays a list of menu options, reads and validates user input
-        /// </summary>
-        /// <returns>returns a validated enum <c>MenuOptions</c> value. 
-        /// <remarks>this value is used by the switch case options for menu functionality</remarks>
-        /// </returns>
-        public static BankMenuOption BankMenu()
-        {
-            // Prompt user to select menu option and Validate input
-            string userInput = PromptUserInput("1.  Create new account \n2.  Desposit money \n3.  Withdraw money \n4.  Transfer money \n5.  Credit account: Make purchase \n" +
-                "6.  Credit account: Make payment \n7.  Term deposit account: Calculate interest \n8.  Term Deposit Account: Add interest \n9.  Print account summary \n10. Print transaction history \n11. Quit", "\n\t***** Banking Menu *****");
-            int validatedInput = Validator.ValidateNumeric<int>(userInput, 1, 11);
 
-            // Users menu selection
-            BankMenuOption userSelection = (BankMenuOption)validatedInput;
-
-            // return users selection
-            return userSelection;
-        }
-        public static AccountMenuOption AccountMenu()
-        {
-            // Prompt user to select menu option and Validate input
-            string userInput = PromptUserInput("\n\n\t***** Account Menu *****\n\n1. Create Credit Account \n2. Create Savings Account \n3. Create term deposit account \n4. Quit\n");
-            int validatedInput = Validator.ValidateNumeric<int>(userInput, 1, 4);
-
-            // Users menu selection
-            AccountMenuOption userSelection = (AccountMenuOption)validatedInput;
-
-            // return users selection
-            return userSelection;
-        }
-        /// <summary>
-        /// Prompts user for account name and initial account balance, reads and
-        /// validates user input. Creates a new account and adds the account to the bank
-        /// </summary>
-        /// <param name="bank">The bank to add the account to</param>
-        /// <exception cref="InvalidOperationException">if the account already exists</exception>
+        // Creates savings account, account holder and adds account into the bank.
         public static void CreateSavingsAccount(Bank bank)
         {
-            // Regex account name validation expression
-            string regexExpression = @"^([A-Z]?[[a-z]{1,20})$|^([A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$|^([A-Z]?[[a-z]{1,20}\040[A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$";
-            // Error message, if the user input does not match the expression
-            string errorMessage = "Invalid input. Maximum three words. No numeric or symbolic characters allowed.";
-
-            // Prompts user for account name and validates
-            string accountName = Validator.RegexValidation(PromptUserInput("Enter account name: "), regexExpression, errorMessage);
-
             // Prompts user for Initial acount balance and validates
-            decimal amount = Validator.ValidateNumeric<decimal>(PromptUserInput("Enter initial balance: "));
+            decimal amount = Validator.ValidateNumeric<decimal>(Validator.PromptUserInput("Enter initial balance: "), 0.0M, decimal.MaxValue);
+
+            // Generates new account number
+            long accNum = bank.GenAccNum();
 
             // Creates a new account
-            Account savingsAccount = new SavingsAccount(amount, accountName);
+            Account savingsAccount = new SavingsAccount(amount, accNum);
 
-            // Tries to add account into the bank
             try
             {
-                bank.AddAccount(savingsAccount);
-                Console.WriteLine("\n\t***** Account Created *****\n", accountName);
+                // adds account to the bank
+                bank.Add<Account>(savingsAccount);
+                Console.WriteLine("\n***** Add account holder *****\n");
+                // Creates account holder
+                AccountHolder accHolder = CreateAccountHolder(accNum);
+                // Adds account holder to the account
+                AddAccountHolder(savingsAccount, accHolder);
+                Console.WriteLine("\n***** Account Created *****\n");
                 Console.WriteLine(savingsAccount.ToString());
             }
-
-            // If the account already exists displays the caught exception
             catch (InvalidOperationException ioe)
             {
                 Console.WriteLine(ioe.Message);
             }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
+        // Creates credit account, account holder and adds account into the bank.
         public static void CreateCreditAccount(Bank bank)
         { 
-            // Regex account name validation expression
-            string regexExpression = @"^([A-Z]?[[a-z]{1,20})$|^([A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$|^([A-Z]?[[a-z]{1,20}\040[A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$";
-            // Error message, if the user input does not match the expression
-            string errorMessage = "Invalid input. Maximum three words. No numeric or symbolic characters allowed.";
-
-            // Prompts user for account name and validates
-            string accountName = Validator.RegexValidation(PromptUserInput("Enter account name: "), regexExpression, errorMessage);
-
             // Prompts user for Initial acount balance and validates
-            decimal amount = Validator.ValidateNumeric<decimal>(PromptUserInput("Enter initial balance: "));
+            decimal balance = Validator.ValidateNumeric<decimal>(Validator.PromptUserInput("Enter initial balance: "), 0.0M, decimal.MaxValue);
 
             // Prompts user for credit limit and validate
-            int limit = Validator.ValidateNumeric<int>(PromptUserInput("Enter credit limit: "));
+            int limit = Validator.ValidateNumeric<int>(Validator.PromptUserInput("Enter credit limit: "), 0, int.MaxValue);
+
+            // Generates new account number
+            long accNum = bank.GenAccNum();
 
             // Creates a new account
-            Account creditAccount = new CreditAccount(amount, accountName, limit);
+            Account creditAccount = new CreditAccount(balance, accNum, limit);
 
-            // Tries to add account into the bank
             try
             {
-                bank.AddAccount(creditAccount);
-                Console.WriteLine("\n\t***** Account Created *****\n");
+                // Add account to the list of accounts in the bank
+                bank.Add<Account>(creditAccount);
+
+                Console.WriteLine("\n***** Add account holder *****\n");
+
+                // Creates a new account holder
+                AccountHolder accHolder = CreateAccountHolder(accNum);
+                // Adds account holder to the account
+                AddAccountHolder(creditAccount, accHolder);
+                Console.WriteLine("\n***** Account Created *****\n");
                 Console.WriteLine(creditAccount.ToString());
             }
-
-            // If the account already exists displays the caught exception
             catch (InvalidOperationException ioe)
             {
                 Console.WriteLine(ioe.Message);
             }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
+        // Creates term deposit account, account holder and adds account into the bank.
         public static void CreateTermDepositAccount(Bank bank)
         {
-            // Regex account name validation expression
-            string regexExpression = @"^([A-Z]?[[a-z]{1,20})$|^([A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$|^([A-Z]?[[a-z]{1,20}\040[A-Z]?[a-z]{1,20}\040[A-Z]?[a-z]{1,20})$";
-            // Error message, if the user input does not match the expression
-            string errorMessage = "Invalid input. Maximum three words. No numeric or symbolic characters allowed.";
-
-            // Prompts user for account name and validates
-            string accountName = Validator.RegexValidation(PromptUserInput("Enter account name: "), regexExpression, errorMessage);
-
             // Prompts user for Initial acount balance and validates
-            decimal amount = Validator.ValidateNumeric<decimal>(PromptUserInput("Enter initial balance: "));
+            decimal amount = Validator.ValidateNumeric<decimal>(Validator.PromptUserInput("Enter initial balance: "), 0.0M, decimal.MaxValue);
 
             // Prompts user for interest rate and validate
-            decimal interestRate = Validator.ValidateNumeric<decimal>(PromptUserInput("Enter interest rate: "));
+            decimal interestRate = Validator.ValidateNumeric<decimal>(Validator.PromptUserInput("Enter interest rate: "), 0.0M, 20.0M);
 
             // Prompts user for term deposit duration and validate
-            int duration = Validator.ValidateNumeric<int>(PromptUserInput("Number of days for term deposit: "));
+            int duration = Validator.ValidateNumeric<int>(Validator.PromptUserInput("Number of days for term deposit: "), 0, int.MaxValue);
+
+            // Generates new account number
+            long accNum = bank.GenAccNum();
 
             // Creates a new account
-            Account termDepositAccount = new TermDepositAccount(amount, accountName, interestRate, duration);
+            Account termDepositAccount = new TermDepositAccount(amount, accNum, interestRate, duration);
 
-            // Tries to add account into the bank
             try
             {
-                bank.AddAccount(termDepositAccount);
-                Console.WriteLine("\n\t***** Account Created *****\n", accountName);
+                // Adds the account to the list of account holders in the bank
+                bank.Add<Account>(termDepositAccount);
+
+                Console.WriteLine("\n***** Add account holder *****\n");
+
+                // Create an account holder
+                AccountHolder accHolder = CreateAccountHolder(accNum);
+                // Adds the account holder to the account
+                AddAccountHolder(termDepositAccount, accHolder);
+                Console.WriteLine("\n***** Account Created *****\n");
                 Console.WriteLine(termDepositAccount.ToString());
             }
-            // If the account already exists displays the caught exception
             catch (InvalidOperationException ioe)
             {
                 Console.WriteLine(ioe.Message);
             }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
-        /// <summary>
-        /// Prompts user for account name, searches for the account in the
-        /// bank and returns the search result.
-        /// </summary>
-        /// <param name="bank">bank in which to search the account</param>
-        /// <returns>either return the account address or null</returns>
-        private static Account FindAccount(Bank bank)
+        // Removes account from the list of accounts in the bank
+        public static void RemAccount(Bank bank)
         {
-            // Prompt user for account name
-            string accountName = PromptUserInput("Enter account name: ");
+            // prompts user for account number and validates
+            long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
 
-            // Find if the account exists
-            Account account = bank.GetAccount(accountName);
-
-            // Return the result of the search
-            return account;
+            try
+            {
+                // finds if the account exists in the bank
+                Account acc = bank.Find<Account>(accNum);
+                if (acc == null) Console.WriteLine("\n***** NullReference: An account with the provided account number does not exist *****\n");
+                // if account exists, remove account
+                else
+                {
+                    // find if any of the account holders have subscribed for notifications
+                    AccountHolder subscriber = bank.FindObserver(accNum);
+                    // If subscription exists, detach subscriber
+                    if (subscriber != null) bank.Detach(subscriber);
+                    // remove account from the bank
+                    bank.Rem<Account>(acc);
+                    // remove account number from the list of existing account numbers
+                    bank.RemAccNum(accNum);
+                }
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (ArgumentException ae)
+            {
+                Console.WriteLine(ae.Message);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
+
+        // Creates and return the reference of a new account holder
+        public static AccountHolder CreateAccountHolder(long accNum)
+        {
+            // Error message, if the user input does not match the regex
+            string errorMessage = "Invalid input:\n\nOnly one word allowed (do not enter any empty spaces)\nOnly first letter can be capital (optional)\nNumeric and symbolic characters not allowed\nMaximum 30 letters";
+            // regex to validate name
+            string regexName = @"^([A-Z]?[[a-z]{1,30})$";
+
+            // Prompts user for account name and validates
+            string fName = Validator.RegexValidation(Validator.PromptUserInput("Enter first name: "), regexName, errorMessage);
+            string lName = Validator.RegexValidation(Validator.PromptUserInput("Enter last name: "), regexName, errorMessage);
+
+            AccountHolder accHolder = new (fName, lName, accNum);
+
+            return accHolder;
+        }
+        // Bank menu option: Adds a new account holder to the account.
+        public static void AddAccountHolder(Bank bank)
+        {
+            // Error message, if the user input does not match the regex
+            string errorMessage = "Invalid input:\n\nOnly one word allowed (do not enter any empty spaces)\nOnly first letter can be capital (optional)\nNumeric and symbolic characters not allowed\nMaximum 30 letters";
+            // regex to validate name
+            string regexName = @"^([A-Z]?[[a-z]{1,30})$";
+
+            // prompts user for account number and validates
+            long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
+          
+            try
+            {
+                // finds if the account exists in the bank
+                Account acc = bank.Find<Account>(accNum);
+                if (acc == null) throw new NullReferenceException("\n***** NullReference: An account with the given account number could not be found *****\n");
+                else
+                {
+                    // Prompts user for account name and validates
+                    string fName = Validator.RegexValidation(Validator.PromptUserInput("Enter first name: "), regexName, errorMessage);
+                    string lName = Validator.RegexValidation(Validator.PromptUserInput("Enter last name: "), regexName, errorMessage);
+
+                    // finds if the account holder exists in the account
+                    AccountHolder accHolder = acc.Find<AccountHolder>(accNum, fName, lName);
+                    if (accHolder == null)
+                    {
+                        // create an account holder instance
+                        accHolder = new AccountHolder(fName, lName, accNum);
+                        // adds account holder to the account and prints confirmation. 
+                        acc.Add<AccountHolder>(accHolder);
+                    }
+                    else throw new InvalidOperationException("\n***** InvalidOperation: An Account holder with the provided details already exists *****\n");
+                }          
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch(InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        // Adds account holder to the account at the time of new account creation
+        public static void AddAccountHolder(Account acc, AccountHolder accHolder)
+        {
+            try
+            {
+                // adds account holder to the account holder list in the account and prints confirmation. 
+                acc.Add<AccountHolder>(accHolder);
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch(InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        // Bank menu option: Removes an account holder from the account.
+        public static void RemAccountHolder(Bank bank)
+        {
+            // Error message, if the user input does not match the regex
+            string errorMessage = "Invalid input:\n\nOnly one word allowed (do not enter any empty spaces)\nOnly first letter can be capital (optional)\nNumeric and symbolic characters not allowed\nMaximum 30 letters";
+            // regex to validate name
+            string regexName = @"^([A-Z]?[[a-z]{1,30})$";
+
+            // prompts user for account number and validates
+            long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
+
+            try
+            {
+                // finds if the account exists in the bank
+                Account acc = bank.Find<Account>(accNum);
+                if (acc == null) Console.WriteLine("\n***** NullReference: An account with the provided account number does not exist *****\n");
+                else
+                {
+                    // Prompts user for account name and validates
+                    string fName = Validator.RegexValidation(Validator.PromptUserInput("Enter first name: "), regexName, errorMessage);
+                    string lName = Validator.RegexValidation(Validator.PromptUserInput("Enter last name: "), regexName, errorMessage);
+                    // finds if the account holder exists in the account
+                    AccountHolder accHolder = acc.Find<AccountHolder>(accNum, fName, lName);
+                    // adds account holder to the account and prints confirmation. 
+                    if (accHolder != null) acc.Rem<AccountHolder>(accHolder);
+                    else throw new NullReferenceException("\n***** NullReference: An account holder with the provided details could not be found *****\n");
+                }
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        // Removes an account holder from the account at the time of removing an account.
+        public static void RemAccountHolder(Account acc, AccountHolder accHolder)
+        {
+            try
+            {
+                // removes account holder from the accound holders list in the account and prints confirmation. 
+                acc.Rem<AccountHolder>(accHolder);
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        // Bank menu option: Adds subscriber to the subscribers list for transaction notifications
+        public static void AddSubscriber(Bank bank)
+        {
+            // Error message, if the user input does not match the regex
+            string errorMessage = "Invalid input:\n\nOnly one word allowed (do not enter any empty spaces)\nOnly first letter can be capital (optional)\nNumeric and symbolic characters not allowed\nMaximum 30 letters";
+            // regex to validate name
+            string regexName = @"^([A-Z]?[[a-z]{1,30})$";
+
+            // prompts user for account number and validates
+            long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
+
+            try
+            {
+                // finds if the account exists in the bank
+                Account acc = bank.Find<Account>(accNum);
+                if (acc == null) throw new NullReferenceException("\n***** NullReference: An account with the given account number could not be found *****\n");
+                else
+                {
+                    // Prompts user for account name and validates
+                    string fName = Validator.RegexValidation(Validator.PromptUserInput("Enter first name: "), regexName, errorMessage);
+                    string lName = Validator.RegexValidation(Validator.PromptUserInput("Enter last name: "), regexName, errorMessage);
+
+                    // finds if the account holder exists in the account
+                    AccountHolder accHolder = acc.Find<AccountHolder>(accNum, fName, lName);
+                    // if account holder exists, adds account holder as subscriber in the subscribers list in the bank
+                    if (accHolder != null) bank.Attach(accHolder);
+                    else throw new NullReferenceException("\n***** NullReference: An AccountHoler with the provided details could not be found *****\n");
+                }
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (ArgumentException ae)
+            {
+                Console.WriteLine(ae.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        // Adds subscriber to the subscribers list during the creation of a new account
+        public static void AddSubscriber(Bank bank, AccountHolder subscriber)
+        {
+            try
+            {
+                // adds subscriber to the subscribers list in the bank and prints confirmation. 
+                bank.Attach(subscriber);
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        // Bank menu option: Removes a subscriber from the subscribers list
+        public static void RemSubscriber(Bank bank)
+        {
+            // Error message, if the user input does not match the regex
+            string errorMessage = "Invalid input:\n\nOnly one word allowed (do not enter any empty spaces)\nOnly first letter can be capital (optional)\nNumeric and symbolic characters not allowed\nMaximum 30 letters";
+            // regex to validate name
+            string regexName = @"^([A-Z]?[[a-z]{1,30})$";
+
+            // prompts user for account number and validates
+            long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
+
+            try
+            {
+                // finds if the account exists in the bank
+                Account acc = bank.Find<Account>(accNum);
+                if (acc == null) Console.WriteLine("\n***** NullReference: An account with the provided account number does not exist *****\n");
+                else
+                {
+                    // Prompts user for account name and validates
+                    string fName = Validator.RegexValidation(Validator.PromptUserInput("Enter first name: "), regexName, errorMessage);
+                    string lName = Validator.RegexValidation(Validator.PromptUserInput("Enter last name: "), regexName, errorMessage);
+                    // finds if the account holder exists in the account
+                    AccountHolder accHolder = acc.Find<AccountHolder>(accNum, fName, lName);
+                    // if account holder exists, remove account holder from the subscribers list in the bank and print confirmation
+                    if (accHolder != null) bank.Detach(accHolder);
+                    else throw new NullReferenceException("\n***** NullReference: An account holder with the provided details could not be found *****\n");
+                }
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (ArgumentException ae)
+            {
+                Console.WriteLine(ae.Message);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        // Removes a subscriber from the subscribers list at the time of removing an account from the bank.
+        public static void RemSubscriber(Bank bank, AccountHolder subscriber)
+        {
+            try
+            {
+                // remvoes account holder from the subscriber list in the bank and prints confirmation. 
+                bank.Detach(subscriber);
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine(ioe.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
         /// <summary>
         /// Validates account and deposit amount.
         /// If the account exists, initializes a deposit transaction 
@@ -305,8 +631,10 @@ namespace BankingSystem_Iteration5_AddAccountTypes
 
                 // Account validation
 
+                // Prompt user for account name
+                long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
                 // Checks if the account exists
-                Account account = FindAccount(bank);
+                Account account = bank.Find<Account>(accNum);
                 // If account with the provided name does not exist, throws exception
                 if (account == null) throw new Exception("***** Account does not exist *****");
 
@@ -324,7 +652,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                     // if CreditAccount, user prompt is:
                     if (account.GetType() == typeof(CreditAccount)) userPrompt = "Enter Payment amount: ";
 
-                    amount = Validator.ValidateNumeric<decimal>(PromptUserInput(userPrompt));
+                    amount = Validator.ValidateNumeric<decimal>(Validator.PromptUserInput(userPrompt));
 
                     try
                     {
@@ -360,7 +688,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
         /// <summary>
         /// Validates account and withdrawal amount.
         /// If the account exists, initializes a withdrawal transaction 
-        /// and tries to make the deposit. 
+        /// and tries to make the withdrawal. 
         /// If the account does not exist or the withdrawal fails, shows 
         /// relevant error messages.
         /// </summary>
@@ -371,8 +699,11 @@ namespace BankingSystem_Iteration5_AddAccountTypes
         {
             try
             {
+                // Prompt user for account name
+                long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
+
                 // Account validation
-                Account account = FindAccount(bank);
+                Account account = bank.Find<Account>(accNum);
 
                 // If account with the provided name does not exist, throws exception
                 if (account == null) throw new Exception("***** Account does not exist *****");
@@ -388,7 +719,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                     if (account.GetType() == typeof(CreditAccount)) userPrompt = "Enter Purchase amount: ";
 
                     // Prompt user for withdrawal amount and validate
-                    decimal amount = Validator.ValidateNumeric<decimal>(PromptUserInput(userPrompt));
+                    decimal amount = Validator.ValidateNumeric<decimal>(Validator.PromptUserInput(userPrompt));
 
                     try
                     {
@@ -441,9 +772,10 @@ namespace BankingSystem_Iteration5_AddAccountTypes
             try
             {
                 Account fromAccount, toAccount;
-
+                // Prompt user for account name
+                long fromAccNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter from account number: "));
                 // Checks if the from and to accounts exist
-                fromAccount = FindAccount(bank);
+                fromAccount = bank.Find<Account>(fromAccNum);
                 // If account with the provided name does not exist, throws exception
                 if (fromAccount == null) throw new Exception("***** From account does not exist *****");
 
@@ -454,13 +786,14 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                     Console.WriteLine("Invalid operation: Can not transfer money from {0}", fromAccount.GetType().Name);
                     return;
                 }
-
-                toAccount = FindAccount(bank);
+                // Prompt user for account name
+                long toAccNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter to account number: "));
+                toAccount = bank.Find<Account>(toAccNum);
                 // If account with the provided name does not exist, throws exception
                 if (toAccount == null) throw new Exception("***** Transfer failed. To account does not exist *****");
 
                 // Prompt user for transfer amount and validate
-                string userInputAmount = PromptUserInput("Enter transfer amount: ");
+                string userInputAmount = Validator.PromptUserInput("Enter transfer amount: ");
                 decimal amount = Validator.ValidateNumeric<decimal>(userInputAmount);
 
                 try
@@ -494,10 +827,14 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                 Console.WriteLine("The following error occured: {0}\nInner exception: {1}\nMessage: {2}", e.GetType().ToString(), e.InnerException.ToString(), e.Message);
             }
         }
+
+        // Calculates interest based on interst rate and number of days provides
         public static Account CalculateInterest(Bank bank, out decimal interest, out int days)
         {
+            // Prompt user for account name
+            long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
             // Checks if the account exist
-            Account account = FindAccount(bank);
+            Account account = bank.Find<Account>(accNum);
             interest = 0;
             days = 0;
 
@@ -508,7 +845,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                 {
                     // calculates the interest for the user specified no. of days
                     TermDepositAccount tDepAccount = (account as TermDepositAccount);
-                    days = Validator.ValidateNumeric<int>(PromptUserInput("Enter number of days: "), 0, int.MaxValue);
+                    days = Validator.ValidateNumeric<int>(Validator.PromptUserInput("Enter number of days: "), 0, int.MaxValue);
                     interest = tDepAccount.CalculateInterest(days);
                 }
                 catch(Exception e) 
@@ -521,6 +858,8 @@ namespace BankingSystem_Iteration5_AddAccountTypes
 
             return account;
         }
+        // Calculates interest based on provided interest and number of days and
+        // deposits into the term deposit account.
         public static void DepositInterest(Bank bank)
         {
             Console.WriteLine("\t***** Deposit interest *****\n\n");
@@ -540,16 +879,14 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                 Console.WriteLine(ioe.Message);
             }
         }
-        /// <summary>
-        /// prompts user for account name. If the account exists displays 
-        /// the account summary, else shows error message
-        /// </summary>
-        /// <param name="bank">the bank which has the account that the user 
-        /// wants the account summary for</param>
+
+        // Prints summary for an account associated with the provided account number
         public static void PrintSummary(Bank bank)
         {
+            // Prompt user for account name
+            long accNum = Validator.ValidateNumeric<long>(Validator.PromptUserInput("Enter account number: "));
             // Check if the account exists
-            Account account = FindAccount(bank);
+            Account account = bank.Find<Account>(accNum);
 
             // If the account does not exist
             if (account == null) Console.WriteLine("\n***** The account does not exist *****\n");
@@ -563,10 +900,14 @@ namespace BankingSystem_Iteration5_AddAccountTypes
                 Console.WriteLine(account.ToString());
             }
         }
+
+        // Prints history of all past transactions
         public static void PrintTransactionHistory(Bank bank)
         {
             bank.PrintTransactionHistory();
         }
+
+        // Serializes Bank into a local data base in XML format
         public static void Serialize(Bank bank)
         {
             // Creates a new DataContractSerializer to serialize a stream
@@ -584,6 +925,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
             //Closes resources
             //writer.Close();
         }
+        // Deserializes from the local database 
         public static void Deserialize(out Bank bank, string fileName)
         {
             // Creates a new DataContractSerializer to serialize a stream
@@ -603,10 +945,16 @@ namespace BankingSystem_Iteration5_AddAccountTypes
         }
     }
     /// <summary>
-    /// This public enumerated type <c>Menu</c> represent menu options
+    /// This public enumerated type <c>BankMenuOptions</c> represent menu options
     /// <para>used in the switch case statements to provide menu options functionality.</para>
     /// <see cref="switch"/>
     /// </summary>
-    public enum BankMenuOption { CREATE_NEW_ACCOUNT, DEPOSIT_MONEY, WITHDRAW_MONEY, TRANSFER_MONEY, CREDIT_ACCOUNT_MAKE_PURCHASE, CREDIT_ACCOUNT_MAKE_PAYMENT, TERM_DEPOSIT_CALCULATE_INTEREST, TERM_DEPOSIT_ADD_INTEREST, PRINT_SUMMARY, PRINT_TRANSACTION_HISTORY, QUIT };
+    public enum BankMenuOption { CREATE_NEW_ACCOUNT, REMOVE_ACCOUNT, ADD_ACCOUNT_HOLDER, REMOVE_ACCOUNT_HOLDER, ADD_SUBSCRIBER, REMOVE_SUBSCRIBER, DEPOSIT_MONEY, WITHDRAW_MONEY, TRANSFER_MONEY, CREDIT_ACCOUNT_MAKE_PURCHASE, CREDIT_ACCOUNT_MAKE_PAYMENT, TERM_DEPOSIT_CALCULATE_INTEREST, TERM_DEPOSIT_ADD_INTEREST, PRINT_SUMMARY, PRINT_TRANSACTION_HISTORY, QUIT };
+    
+    /// <summary>
+    /// This public enumerated type <c>AccountMenuOptions</c> represent menu options
+    /// <para>used in the switch case statements to provide menu options functionality.</para>
+    /// <see cref="switch"/>
+    /// </summary>
     public enum AccountMenuOption { CREDIT_ACCOUNT = 1, SAVINGS_ACCOUNT = 2, TERM_DEPOSIT_ACCOUNT = 3, QUIT = 4}
 }
