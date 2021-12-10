@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Xml;
 
-namespace BankingSystem_Iteration4_serializing
+namespace BankingSystem_Iteration5_AddAccountTypes
 {
     /// <summary>
     /// The methods in this class merely (try) call methods from the WithdrawTransaction class 
@@ -20,12 +20,10 @@ namespace BankingSystem_Iteration4_serializing
         /// Fields to be initialized with the fromAccount and toAccount objects
         /// to make the transfer.
         /// </summary>
-        [DataMember(Name = "From_Account")]
+        [DataMember(Name = "Current_From_Account_Summary", Order = 2)]
         private Account _fromAccount;
-
-        [DataMember(Name = "To_Account")]
+        [DataMember(Name = "Current_To_Account_Summary", Order = 4)]
         private Account _toAccount;
-
         /// <summary>
         /// Field to be initialized with the DepositTransaction object
         /// to make the deposit.
@@ -41,17 +39,14 @@ namespace BankingSystem_Iteration4_serializing
         {
             get { return _success; }
         }
-
         /// <summary>
         /// Stores the from and to account balance 
         /// snapshot during the object initialization.
         /// </summary>
-        [DataMember(Name = "Post_Transaction_Balance_From_Account")]
+        [DataMember(Name = "Post_Transaction_Balance_From_Account", Order = 1)]
         private readonly decimal _PostTransactionBalanceFromAccount;
-
-        [DataMember(Name = "Post_Transaction_Balance_To_Account")]
+        [DataMember(Name = "Post_Transaction_Balance_To_Account", Order = 3)]
         private readonly decimal _PostTransactionBalanceToAccount;
-
         /// <summary>
         /// This construtor initializes the <c>_fromAccount</c>, <c>_toAccount</c> 
         /// and <c>_amount</c> fields using the parameters passed to the constructor
@@ -71,7 +66,6 @@ namespace BankingSystem_Iteration4_serializing
             _withdraw = new WithdrawTransaction(fromAccount, amount);
             _deposit = new DepositTransaction(toAccount, amount);
         }
-
         /// <summary>
         /// Calls the WithdrawTransaction and DepositTransaction class Execute() 
         /// methods to make the transfer. If the transfer fails, the relevant 
@@ -105,7 +99,6 @@ namespace BankingSystem_Iteration4_serializing
             // if the transfer was already executed, throw the following exception.
             else throw new InvalidOperationException("A transfer has previously been attempted.");
         }
-
         /// <summary>
         /// Calls the WithdrawTransaction and DepositTransaction class Rollback() 
         /// methods to rollback the transfer. If the rollback fails, the relevant 
@@ -144,7 +137,6 @@ namespace BankingSystem_Iteration4_serializing
                 if (Reversed) throw new InvalidOperationException("A rollback has previously been attempted");
             }                
         }
-
         /// <summary>
         /// Prints the from account and to account summaries
         /// </summary>
@@ -152,15 +144,13 @@ namespace BankingSystem_Iteration4_serializing
         {
             if (Success)
             {
-                Console.WriteLine("\t***** Account Summary *****\n");
-                Console.WriteLine("** {0} ** Transfer successful **\n", DateStamp.ToString());
-                Console.WriteLine("\n{0:c} transferred: \n\nFrom account: {1}\nBalance: {2:c}\n\nTo account: {3}\nBalance: {4:c}\n", _amount, _fromAccount.Name, _PostTransactionBalanceFromAccount, _toAccount.Name, _PostTransactionBalanceToAccount);
+                Console.WriteLine("\t** {0} ** Transfer successful **\n", DateStamp.ToString());
+                Console.WriteLine("\nTransfer amount: {0}", _amount + _fromAccount.ToString() + "\n\n" + _toAccount.ToString());
             }
             else
             {
-                Console.WriteLine("\t***** Account Summary *****\n");
-                Console.WriteLine("{0}  ** Transfer failed **\n", DateStamp.ToString());
-                Console.WriteLine("\nFrom account: {0}\nBalance: {1:c}\n\nTo account: {2}\nBalance: {3:c}\n", _fromAccount.Name, _PostTransactionBalanceFromAccount + _amount, _toAccount.Name, _PostTransactionBalanceToAccount - _amount);
+                Console.WriteLine("\t ** {0} ** Transfer failed **\n", DateStamp.ToString());
+                Console.WriteLine(_fromAccount.ToString() + "\n\n" + _toAccount.ToString());
             }
         }
     }
