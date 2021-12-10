@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Xml;
 
-namespace BankingSystem_Iteration4_serializing
+namespace BankingSystem_Iteration5_AddAccountTypes
 {
     /// <summary>
     /// The methods in this class merely call methods from the account class to 
@@ -24,17 +24,15 @@ namespace BankingSystem_Iteration4_serializing
         /// This field will be initialized with the account in which the 
         /// deposit is to be made
         /// </summary>
-        [DataMember(Name = "Account")]
+        [DataMember(Name = "Current_Account_Summary", Order = 2)]
         private Account _account;
-
         /// <summary>
         /// Stores the account balance snapshot 
         /// during the object initialization.
         /// Initialized in the constructor.
         /// </summary>
-        [DataMember(Name = "Post_Transaction_Balance")]
+        [DataMember(Name = "Post_Transaction_Balance", Order = 1)]
         private readonly decimal _postTransactionBalance;
-
         /// <summary>
         /// Public property to read the success status of the deposit
         /// </summary>
@@ -43,7 +41,6 @@ namespace BankingSystem_Iteration4_serializing
         {
             get { return _success; }
         }
-
         /// <summary>
         /// This constructor initializes the the <c>_account</c> and <c>_amount</c> fields 
         /// of a new <c>DespsitTransaction</c> class instance. 
@@ -55,7 +52,6 @@ namespace BankingSystem_Iteration4_serializing
             _account = account;
             _postTransactionBalance = _account.Balance + _amount;
         }
-
         /// <summary>
         /// Calls the deposit method to make a deposit into the account.
         /// Prints the status messages and summaries and throws relevant 
@@ -81,17 +77,16 @@ namespace BankingSystem_Iteration4_serializing
                 // If deposit failed
                 else
                 {
-                    throw new InvalidOperationException("Deposit amount must be greater than zero.");
+                    throw new InvalidOperationException("Amount must be greater than zero.");
                 }
             }
             // if the deposit has already been executed,
             // throws the following error message
             else
             {
-                throw new InvalidOperationException("The Deposit has already been succesfully executed.");
+                throw new InvalidOperationException("The transaction has already been succesfully executed.");
             }
         }
-
         /// <summary>
         /// Calls the withdraw method to Rolls back a deposit from
         /// the account.Prints the status, and account summary 
@@ -111,12 +106,11 @@ namespace BankingSystem_Iteration4_serializing
                 bool succeeded = _account.Withdraw(_amount);
 
                 // If deposit succeeded
-                if (!succeeded) throw new InvalidOperationException("Rollback failed. Not enough funds in the acccount to make a withdrawl.");
+                if (!succeeded) throw new InvalidOperationException("Rollback failed. Not enough funds in the acccount.");
             }
             // If the deposit has already been reversed, thorws the following exception
             else throw new InvalidOperationException("The amount has already been succesfully rolledback.");
         }
-
         /// <summary>
         /// Prints the success or failed status of the deposit attempt and prints the account summary
         /// </summary>
@@ -124,14 +118,12 @@ namespace BankingSystem_Iteration4_serializing
         {
             if (Success)
             {
-                Console.WriteLine("\t***** Account Summary *****\n");
-                Console.WriteLine("** {0} ** Deposit successful **\n", DateStamp.ToString());
-                Console.WriteLine("Account name: {0}\nDeposit amount: {1:c}\nAccount balance: {2:c}", _account.Name, _amount, _postTransactionBalance);
+                Console.WriteLine("\t** {0} ** Deposit successful **\n", DateStamp.ToString());
+                Console.WriteLine(_account.ToString() + "\nAmount deposited: {0:c}", _amount);
             }
             else
             {
-                Console.WriteLine("\t***** Account Summary *****\n");
-                Console.WriteLine("{0}  ** Deposit failed **\n", DateStamp.ToString());
+                Console.WriteLine("\t**{0} ** Deposit failed **\n", DateStamp.ToString());
                 Console.WriteLine(_account.ToString());
             }
         }
