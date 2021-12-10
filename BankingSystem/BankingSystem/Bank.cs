@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Xml;
 
-namespace BankingSystem_Iteration4_serializing
+namespace BankingSystem_Iteration5_AddAccountTypes
 {   /// <summary>
 /// The instance from this class has two roles. 
 /// First, to add new accounts to the 
@@ -26,10 +26,8 @@ namespace BankingSystem_Iteration4_serializing
         /// </summary>
         [DataMember(Name = "List_of_Accounts")]
         private List<Account> _accounts;
-
         [DataMember(Name = "List_of_Transactions")]
         private List<Transaction> _transactions;
-
         /// <summary>
         /// This constructor initializes a new list of Account type
         /// </summary>
@@ -38,7 +36,6 @@ namespace BankingSystem_Iteration4_serializing
             _accounts = new List<Account>();
             _transactions = new List<Transaction>();
         }
-
         /// <summary>
         /// Adds a new account to the list
         /// </summary>
@@ -53,13 +50,12 @@ namespace BankingSystem_Iteration4_serializing
                 foreach(Account acc in _accounts)
                 {
                     // if the account already exist throw an exception
-                    if (acc.Name == account.Name) throw new InvalidOperationException("An account with this name already exists.");
+                    if (acc.Name == account.Name) throw new InvalidOperationException("Could not create account. An account with this name already exists.");
                 }
             }
             // if the account does not exist, add the account to the list.
             _accounts.Add(account);
         }
-
         /// <summary>
         /// Using the provided account name, searches the list of accounts
         /// and returns the result
@@ -84,27 +80,24 @@ namespace BankingSystem_Iteration4_serializing
             // if account found, returns account reference, else account with null reference
             return account;            
         }
-
         /// <summary>
         /// Calls the Execute method to transfer funds, using the TransferTransaction object.
         /// </summary>
         /// <param name="deposit">Initialized TransferTransaction object, to be used to execute transfer</param>
         public void ExecuteTransaction(Transaction transaction)
         {
-            // Adds transactions to the list of transactions
-            _transactions.Add(transaction);
             // Execute the transaction
             transaction.Execute();
+            // Adds transactions to the list of transactions
+            _transactions.Add(transaction);        
         }
-
         public void RollbackTransaction(Transaction transaction)
         {
-            // Adds transactions to the list of transactions
-            _transactions.Add(transaction);
             // Execute the transaction
             transaction.Rollback();
+            // Adds transactions to the list of transactions
+            _transactions.Add(transaction);          
         }
-
         public void PrintTransactionHistory()
         {
             if (_transactions != null)
