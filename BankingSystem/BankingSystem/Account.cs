@@ -3,18 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using System.Xml;
 
-namespace BankingSystem_Iteration3
+namespace BankingSystem_Iteration4_serializing
 {
     /// <summary>
     /// This is the core <c>Account</c> class that forms part of the banking system.
     /// It includes methods that deposit and withdraw funds and print account summary.
     /// </summary>
+    [DataContract]
     class Account
     {
         /// <summary>
         /// The field to be initialized with the initial account balance
         /// </summary>
+        [DataMember(Name = "Balance")]
         private decimal _balance;
         public decimal Balance
         {
@@ -24,6 +28,7 @@ namespace BankingSystem_Iteration3
         /// <summary>
         /// The field to be initialized with the account name
         /// </summary>
+        [DataMember(Name = "Account_Name")]
         private string _name;
 
         /// <summary>
