@@ -3,21 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using System.Xml;
 
-namespace BankingSystem_Iteration3
+namespace BankingSystem_Iteration4_serializing
 {
     /// <summary>
     /// The methods in this class merely (try) call methods from the WithdrawTransaction class 
     /// and the DepositTransaction class to make a transfer between two accounts and (catch)
     /// any exceptions and display the error to the user, in case of failure in the transaction
     /// </summary>
+    [DataContract]
     class TransferTransaction: Transaction
     {
         /// <summary>
         /// Fields to be initialized with the fromAccount and toAccount objects
         /// to make the transfer.
         /// </summary>
-        private Account _fromAccount, _toAccount;
+        [DataMember(Name = "From_Account")]
+        private Account _fromAccount;
+
+        [DataMember(Name = "To_Account")]
+        private Account _toAccount;
 
         /// <summary>
         /// Field to be initialized with the DepositTransaction object
@@ -29,7 +36,7 @@ namespace BankingSystem_Iteration3
         /// to make the withdrawal
         /// </summary>
         private WithdrawTransaction _withdraw;
-
+        [DataMember]
         public override bool Success
         {
             get { return _success; }
@@ -39,7 +46,11 @@ namespace BankingSystem_Iteration3
         /// Stores the from and to account balance 
         /// snapshot during the object initialization.
         /// </summary>
-        private readonly decimal _currBalanceFromAccount, _currBalanceToAccount;
+        [DataMember(Name = "Post_Transaction_Balance_From_Account")]
+        private readonly decimal _PostTransactionBalanceFromAccount;
+
+        [DataMember(Name = "Post_Transaction_Balance_To_Account")]
+        private readonly decimal _PostTransactionBalanceToAccount;
 
         /// <summary>
         /// This construtor initializes the <c>_fromAccount</c>, <c>_toAccount</c> 
@@ -55,8 +66,8 @@ namespace BankingSystem_Iteration3
         {
             _fromAccount = fromAccount;
             _toAccount = toAccount;
-            _currBalanceFromAccount = _fromAccount.Balance;
-            _currBalanceToAccount = _toAccount.Balance;
+            _PostTransactionBalanceFromAccount = _fromAccount.Balance - _amount;
+            _PostTransactionBalanceToAccount = _toAccount.Balance + _amount;
             _withdraw = new WithdrawTransaction(fromAccount, amount);
             _deposit = new DepositTransaction(toAccount, amount);
         }
@@ -143,13 +154,13 @@ namespace BankingSystem_Iteration3
             {
                 Console.WriteLine("\t***** Account Summary *****\n");
                 Console.WriteLine("** {0} ** Transfer successful **\n", DateStamp.ToString());
-                Console.WriteLine("\n{0:c} transferred: \n\nFrom account: {1}\nBalance: {2:c}\n\nTo account: {3}\nBalance: {4:c}\n", _amount, _fromAccount.Name, _currBalanceFromAccount - _amount, _toAccount.Name, _currBalanceToAccount + _amount);
+                Console.WriteLine("\n{0:c} transferred: \n\nFrom account: {1}\nBalance: {2:c}\n\nTo account: {3}\nBalance: {4:c}\n", _amount, _fromAccount.Name, _PostTransactionBalanceFromAccount, _toAccount.Name, _PostTransactionBalanceToAccount);
             }
             else
             {
                 Console.WriteLine("\t***** Account Summary *****\n");
                 Console.WriteLine("{0}  ** Transfer failed **\n", DateStamp.ToString());
-                Console.WriteLine("\nFrom account: {0}\nBalance: {1:c}\n\nTo account: {2}\nBalance: {3:c}\n", _fromAccount.Name, _currBalanceFromAccount, _toAccount.Name, _currBalanceToAccount);
+                Console.WriteLine("\nFrom account: {0}\nBalance: {1:c}\n\nTo account: {2}\nBalance: {3:c}\n", _fromAccount.Name, _PostTransactionBalanceFromAccount + _amount, _toAccount.Name, _PostTransactionBalanceToAccount - _amount);
             }
         }
     }
