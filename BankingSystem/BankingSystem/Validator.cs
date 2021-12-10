@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
-namespace BankingSystem_Iteration5_AddAccountTypes
+namespace BankingSystem
 {
     /// <summary>
     /// Static class for validator methods
@@ -13,11 +13,27 @@ namespace BankingSystem_Iteration5_AddAccountTypes
     static class Validator
     {
         /// <summary>
-        /// This generic validator, validates int and decimal amounts.
+        /// Displays a message to the user, reads user input and return it.
         /// </summary>
-        /// <typeparam name="T">int or decimal</typeparam>
+        /// <param name="message">Message to prompt user for input</param>
+        /// <param name="heading">Optional heading string</param>
+        /// <returns>user input as a string</returns>
+        public static string PromptUserInput(string message, string heading = null)
+        {
+            if (heading != null)
+            {
+                Console.WriteLine(heading);
+                Console.WriteLine();
+            }
+            Console.WriteLine(message);
+            return (Console.ReadLine());
+        }
+        /// <summary>
+        /// This generic validator, validates int, long and decimal amounts ( can be extended ).
+        /// </summary>
+        /// <typeparam name="T">int, long or decimal</typeparam>
         /// <param name="userInput">input to be validated</param>
-        /// <returns>Returns a validated and parsed decimal or int value.</returns>
+        /// <returns>Returns a validated and parsed int, long or decimal value.</returns>
         public static T ValidateNumeric<T>(string userInput)
         {
             // If vlaue is decimal
@@ -26,11 +42,7 @@ namespace BankingSystem_Iteration5_AddAccountTypes
             {
                 // While the user input is not an integer or decimal value,
                 // continues to prompt user for desired input.
-                while (decimal.TryParse(userInput, out _) != true)
-                {
-                    Console.WriteLine("Invalid input. The amount should be an integer or decimal number.");
-                    userInput = Console.ReadLine();
-                }
+                while (decimal.TryParse(userInput, out _) != true) userInput = PromptUserInput("Invalid input. The amount should be an integer or decimal number");
             }
 
             // If value is int
@@ -38,49 +50,50 @@ namespace BankingSystem_Iteration5_AddAccountTypes
             {
                 // While the user input is not an integer or decimal value,
                 // continues to prompt user for desired input.
-                while (int.TryParse(userInput, out _) != true)
-                {
-                    Console.WriteLine("Invalid input. The amount should be an integer or decimal number.");
-                    userInput = Console.ReadLine();
-                }
+                while (int.TryParse(userInput, out _) != true) userInput = PromptUserInput("Invalid input. The amount should be an integer or decimal number.");
             }
-            
+
+            // If value is int
+            if (type == typeof(long))
+            {
+                // While the user input is not an integer or decimal value,
+                // continues to prompt user for desired input.
+                while (long.TryParse(userInput, out _) != true) userInput = PromptUserInput("Invalid input. The amount should be a long integer.");
+            }
+
             // Returns the validated int or decimal amount
             return (T) Convert.ChangeType(userInput, typeof(T));           
         }
         /// <summary>
-        /// Generic validator, validates int or decimal amount within a range
+        /// Generic validator, validates int, long or decimal amount and ensures its within a range.
         /// </summary>
-        /// <typeparam name="T">int or decimal</typeparam>
+        /// <typeparam name="T">int, long or decimal</typeparam>
         /// <param name="userInput">user input to be validated</param>
         /// <param name="min">minimum range</param>
         /// <param name="max">maximum range</param>
-        /// <returns>a validated int or decimal amount that is within range</returns>
-        public static T ValidateNumeric<T>(string userInput, int min, int max)where T: IComparable
+        /// <returns>a validated int, long or decimal amount that is within range</returns>
+        public static T ValidateNumeric<T>(string userInput, T min, T max)where T: IComparable
         {
             // Validates int or decimal amount and stores input
             T input = ValidateNumeric<T>(userInput);
 
-            // if the input is int
-            Type type = typeof(T);
-            if(type == typeof(int))
+            // While input is less than min and more than max,
+            // keeps prompting user for a valid input within the range
+            while ((input.CompareTo(min) < 0) || input.CompareTo(max) > 0)
             {
-                // While input is less than min and more than max,
-                // keeps prompting user for a valid input within the range
-                while ((input.CompareTo(min) < 0) && input.CompareTo(max) > 0)
-                {
-                    Console.WriteLine("The value must be greater than {0} and less than {1}", min, max);
-                    input = ValidateNumeric<T>(Console.ReadLine());
-                }
-            } 
+                if (input.CompareTo(min) < 0) Console.WriteLine("\n***** The value must be greater than {0} *****\n", min);
+                if (input.CompareTo(max) > 0) Console.WriteLine("The value must be less than {0}", max);
+
+                input = ValidateNumeric<T>(Console.ReadLine());
+            }
             
             // returns validated input within the range
             return input;
         }
         /// <summary>
-        /// Regex user input validator
+        /// Regex string input validator
         /// </summary>
-        /// <param name="userInput">User input to be validated</param>
+        /// <param name="userInput">User input string to be validated</param>
         /// <param name="regexExpression">The regular expression which the regex engine will use 
         /// to match user input to perform data validation.</param>
         /// <param name="errorMessage">The error message to be displayed if the user input could not be matched succesfully</param>
