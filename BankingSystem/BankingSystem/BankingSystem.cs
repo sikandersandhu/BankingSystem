@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using System.Xml.Serialization;
+using System.Runtime.Serialization;
 using System.Xml;
 using System.IO;
 
-namespace BankingSystem_Iteration3
+namespace BankingSystem_Iteration4_serializing
 {
     /// <summary>
     /// Tester class for banking system
@@ -19,14 +19,14 @@ namespace BankingSystem_Iteration3
         {
             // Create bank
             Bank bank = new();
-            /*try
+            try
             {
-                XmlDeserializer(out bank, @"BankData");
+                Deserialize(out bank, @"BankData");
             }
             catch (Exception e)
             {
                 Console.WriteLine("The following error occured: {0}\nMore details: {1}\nMessage: {2}", e.GetType().ToString(), e.InnerException.ToString(), e.Message);
-            }*/
+            }
 
             // Display bank menu
             BankMenu(bank);
@@ -76,7 +76,7 @@ namespace BankingSystem_Iteration3
                         Console.WriteLine("Thanks for banking with us. Good day.");
                         try
                         {
-                            XmlSerializer(bank);
+                            Serialize(bank);
                         }
                         catch(Exception e)
                         {
@@ -356,39 +356,38 @@ namespace BankingSystem_Iteration3
             bank.PrintTransactionHistory();
         }
 
-        public static void XmlSerializer(Bank bank)
+        public static void Serialize(Bank bank)
         {
-            // Creates a new XmlSerializer to serialize a stream
-            XmlSerializer s = new (typeof(Bank));
+            // Creates a new DataContractSerializer to serialize a stream
+            DataContractSerializer s = new (typeof(Bank));
 
-            // FileStream is needed to open a file that can be written to.
-            FileStream fStream = File.Open(@"BankData", FileMode.Create, FileAccess.Write);
+            // FileStream to write a stream
+            //FileStream writer = File.Open(@"BankData", FileMode.Create, FileAccess.Write);
 
-            // StreamWriter is needed to create a stream that will be writen to file
-            StreamWriter sWriter = new (fStream);
-            
-            // Serializes the Bank Lists to xml doc
-            s.Serialize(sWriter, bank);
+            var settings = new XmlWriterSettings() { Indent = true };
+            using (var writter = XmlWriter.Create(@"BankData", settings))
+
+                // Serializes the Bank Lists to xml doc
+                s.WriteObject(writter, bank);
 
             //Closes resources
-            sWriter.Close();
-            fStream.Close();
+            //writer.Close();
         }
-        public static void XmlDeserializer(out Bank bank, string fileName)
+        public static void Deserialize(out Bank bank, string fileName)
         {
-            // Creates a new XmlSerializer
-            XmlSerializer s = new(typeof(Bank));
+            // Creates a new DataContractSerializer to serialize a stream
+            DataContractSerializer s = new(typeof(Bank));
 
-            // Opens the file to read from 
+            // Opens the file to read
             FileStream fStream = File.Open(fileName, FileMode.Open, FileAccess.Read);
 
             // Reads from the file
-            StreamReader sRead = new(fStream);
+            XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(fStream, new XmlDictionaryReaderQuotas());
 
             // Deserializes xml doc to a new instance of bank
-            bank = (Bank)s.Deserialize(sRead);
+            bank = (Bank)s.ReadObject(reader, true);
 
-            sRead.Close();
+            reader.Close();
             fStream.Close();
         }
     }
