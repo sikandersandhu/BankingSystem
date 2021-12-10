@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
+using System.Runtime.Serialization;
 using System.Xml;
 
-namespace BankingSystem_Iteration3
+namespace BankingSystem_Iteration4_serializing
 {   /// <summary>
 /// The instance from this class has two roles. 
 /// First, to add new accounts to the 
@@ -16,35 +16,19 @@ namespace BankingSystem_Iteration3
 /// Second, The overriden ExecuteTransaction method, calls methods from the DepositTransaction,
 /// WithdrawTransaction and TransferTransaction classes to execute transaction.
 /// </summary>
-    //[Serializable]
+    [DataContract]
+    [KnownType(typeof(List<Account>))]
+    [KnownType(typeof(List<Transaction>))]
     class Bank
     {
         /// <summary>
         /// this field is a list of type Account, into which accounts will be added
         /// </summary>
+        [DataMember(Name = "List_of_Accounts")]
         private List<Account> _accounts;
-        [XmlArray(ElementName = "List of accounts")]
-        [XmlArrayItem(ElementName = "Account Name", Namespace = "BankingSystem_Iteration3", IsNullable = true)]
-        public List<Account> Accounts
-        {
-            get => _accounts;
-            set
-            {
-                _accounts = value;
-            }
-        }
 
+        [DataMember(Name = "List_of_Transactions")]
         private List<Transaction> _transactions;
-        [XmlArray(ElementName = "List of transactions")]
-        [XmlArrayItem(ElementName = "Transactions", Namespace = "BankingSystem_Iteration3", IsNullable = true)]
-        public List<Transaction> Transactions
-        {
-            get => _transactions;
-            set
-            {
-                _transactions = value;
-            }
-        }
 
         /// <summary>
         /// This constructor initializes a new list of Account type
